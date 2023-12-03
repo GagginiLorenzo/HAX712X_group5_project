@@ -66,7 +66,7 @@ def graphique(ville, polluant):
         df_pvs = df_pvs.set_index(["date_debut"])
         #on moyennise par jour
         axes[i].plot(df_pvs["valeur"].resample("d").mean())
-        #décorations et titre
+        #labellisations et titre
         for label in axes[i].get_xticklabels():
             label.set_ha("right")
             label.set_rotation(45)
