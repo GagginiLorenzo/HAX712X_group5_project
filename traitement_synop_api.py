@@ -1,4 +1,4 @@
-#%%
+# %%
 import json
 import pandas as pd
 from datetime import datetime
@@ -19,43 +19,39 @@ else:
     print(f"La requête a échoué avec le code d'état {response.status_code}")
 
 
-#%%
-results = df_synop.get('results', [])
+# %%
+results = df_synop.get("results", [])
 df_synop = pd.DataFrame(results)
 
-#%%
-garder = ['date','nom','pres','tc','tminsolc','nom_dept','code_dep']
+# %%
+garder = ["date", "nom", "pres", "tc", "tminsolc", "nom_dept", "code_dep"]
 df_synop = df_synop[garder]
-df_synop["date"] = df_synop["date"].apply(
-            lambda _: datetime.fromisoformat(_)
-        )
-#%%
-df_synop = df_synop[df_synop.date > '2022-09']
+df_synop["date"] = df_synop["date"].apply(lambda _: datetime.fromisoformat(_))
+# %%
+df_synop = df_synop[df_synop.date > "2022-09"]
 
-#%% 
-#sélection de colonne avec au moins 70% de données non nulles
-#df_synop = df_synop.loc[:, df_synop.isnull().sum()/len(df_synop.index) <0.3] 
+# %%
+# sélection de colonne avec au moins 70% de données non nulles
+# df_synop = df_synop.loc[:, df_synop.isnull().sum()/len(df_synop.index) <0.3]
 
-#%%
-#formatage date
-df_synop['date'] = df_synop['date'].apply(lambda x: x.replace(tzinfo=None))
+# %%
+# formatage date
+df_synop["date"] = df_synop["date"].apply(lambda x: x.replace(tzinfo=None))
 
-#%%
-#test sur montpellier
-montpeul = df_synop[df_synop['nom']=='MONTPELLIER']
+# %%
+# test sur montpellier
+montpeul = df_synop[df_synop["nom"] == "MONTPELLIER"]
 montpeul = montpeul.set_index(["date"])
 
 
 # %%
-#graphique de la pression en moyenne par jour
-fig, ax = plt.subplots(layout='constrained')
-ax.plot(montpeul['pres'].resample("d").mean())
+# graphique de la pression en moyenne par jour
+fig, ax = plt.subplots(layout="constrained")
+ax.plot(montpeul["pres"].resample("d").mean())
 for label in ax.get_xticklabels():
-            label.set_ha("right")
-            label.set_rotation(45)
-ax.set_title(
-            "Valeur de la pression à Montpellier"
-        )
+    label.set_ha("right")
+    label.set_rotation(45)
+ax.set_title("Valeur de la pression à Montpellier")
 ax.grid(True)
 plt.show()
 # %%

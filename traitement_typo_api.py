@@ -36,7 +36,7 @@ pol_influ = df_atmo.groupby(['influence', 'nom_poll'])[
 polluants = pol_influ.index.tolist()
 
 # position des labels et tracé du graphique
-x = np.arange(len(polluants)) +1  # the label locations
+x = np.arange(len(polluants)) + 1  # the label locations
 width = 0.25  # the width of the bars
 multiplier = 0
 
@@ -63,10 +63,10 @@ pol_typo = df_atmo.groupby(['typologie', 'nom_poll'])[
     'valeur'].mean().round(1).unstack(level=0)
 polluants = pol_typo.index.tolist()
 
-  # the label locations
+# the label locations
 x = np.arange(len(polluants))
 # the width of the bars
-width = 0.25  
+width = 0.25
 multiplier = -2
 fig, ax = plt.subplots(layout='constrained')
 
