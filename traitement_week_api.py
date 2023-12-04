@@ -1,6 +1,5 @@
 # %%
 import pandas as pd
-import numpy as np
 from datetime import datetime
 import matplotlib.pyplot as plt
 import requests
@@ -52,14 +51,17 @@ def graphique(ville, polluant):
     nb_stations = len(stations)
 
     if nb_stations == 1:
-        fig, axes = plt.subplots(1, 1, figsize=(10, 5))  # Créer une seule sous-figure
+        # Créer une seule sous-figure
+        fig, axes = plt.subplots(1, 1, figsize=(10, 5))
         axes = [axes]  # Mettre l'unique axe dans une liste
     else:
         fig, axes = plt.subplots(nb_stations, 1, figsize=(10, 15), sharex=True)
 
-    fig.suptitle("Pollution selon le jour de la semaine à Montpellier", fontsize=16)
+    fig.suptitle(
+        "Pollution selon le jour de la semaine à Montpellier", fontsize=16)
     # pour la légende
-    jour = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
+    jour = ["lundi", "mardi", "mercredi",
+            "jeudi", "vendredi", "samedi", "dimanche"]
     for i in range(nb_stations):
         # on ne garde que les données concernant la station en question
         df_pvs = df_pv.loc[df_pv["nom_station"] == stations[i]]

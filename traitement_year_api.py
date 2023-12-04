@@ -19,20 +19,12 @@ else:
     print(f"La requête a échoué avec le code d'état {response.status_code}")
 
 
-# %%
+#%%
 records = data.get("features", [])
 records_data = [record["attributes"] for record in records]
 df_atmo = pd.DataFrame(records_data)
 
-
-# %%
-# liste des villes et des polluants
-villes = df_atmo["nom_com"].unique().tolist()
-villes.sort()
-polluants = df_atmo["nom_poll"].unique().tolist()
-polluants.sort()
-
-
+#%%
 # fonction qui fait la sélection ville et polluant
 def selection(ville, polluant):
     # suppression d'une station de Montpellier
@@ -55,9 +47,11 @@ def graphique(ville, polluant):
     nom_stations = df_pv["nom_station"].unique()
     nb_stations = len(nom_stations)
     # plusieurs graphiques
-    fig, axes = plt.subplots(
-        nb_stations, 1, figsize=(10, 15), sharex=True, layout="constrained"
-    )
+    if nb_stations == 1:
+        fig, axes = plt.subplots(1, 1, figsize=(10, 5), layout="constrained")  # Créer une seule sous-figure
+        axes = [axes]  # Mettre l'unique axe dans une liste
+    else:
+        fig, axes = plt.subplots(nb_stations, 1, figsize=(10, 15), sharex=True, layout="constrained")
     # titre général
     fig.suptitle("Pollution au " + str(polluant) + " à " + str(ville), fontsize=16)
 
