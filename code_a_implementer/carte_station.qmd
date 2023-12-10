@@ -17,7 +17,7 @@ import ipywidgets
 pd.options.mode.chained_assignment = None  # default='warn'
  
 
-url = "https://services9.arcgis.com/7Sr9Ek9c1QTKmbwr/arcgis/rest/services/mesures_occitanie_mensuelle_poll_princ/FeatureServer/0/query?where=1%3D1&outFields=nom_com,nom_dept,nom_station,x_l93,y_l93,nom_poll,valeur&outSR=4326&f=json"
+url = "https://services9.arcgis.com/7Sr9Ek9c1QTKmbwr/arcgis/rest/services/mesures_occitanie_mensuelle_poll_princ/FeatureServer/0/query?where=1%3D1&outFields=nom_com,nom_dept,nom_station,nom_poll,valeur&outSR=4326&f=json"
 
 response = requests.get(url)
 
@@ -37,10 +37,6 @@ df_combined['y'] = df_combined['geometry'].apply(lambda geo: geo['y'])
 df_combined['nom_station'] = df_combined['attribute'].apply(lambda attr: attr['nom_station'])
 df_combined['nom_poll'] = df_combined['attribute'].apply(lambda attr: attr['nom_poll'])
 df_combined['valeur'] = df_combined['attribute'].apply(lambda attr: attr['valeur'])
-# Add more columns as needed
-#%%
-
-
 df_atmo =df_combined.drop(['geometry', 'attribute'], axis=1)
 
 # liste des villes et des polluants
@@ -70,8 +66,8 @@ dataSO2 = dataSO2_7.groupby(['nom_station', 'nom_poll']).max().reset_index()
 dataNO2 = dataNO2_8.groupby(['nom_station', 'nom_poll']).max().reset_index()
 
 # Charger les données des stations des villes dans la région Occitanie
-df = pd.DataFrame(dataNO2)
-df=df.dropna(axis=1)
+df=  pd.DataFrame(dataNO2).dropna(subset=['valeur'])
+
 
 # Charger les données des départements
 geojson_path = "https://france-geojson.gregoiredavid.fr/repo/regions/occitanie/departements-occitanie.geojson"
@@ -117,44 +113,6 @@ markers_layer = ipyleaflet.MarkerCluster(
 )
 mymap.add_layer(markers_layer)
 
-
 mymap
-
-
-```
-```{python}
-url="https://services9.arcgis.com/7Sr9Ek9c1QTKmbwr/arcgis/rest/services/mesures_occitanie_mensuelle_poll_princ/FeatureServer/0/query?where=1%3D1&outFields=nom_station,code_station,insee_com&outSR=4326&f=json"
-
-
-
-
-response = requests.get(url)
-
-if response.status_code == 200:
-    data = response.json()
-else:
-    print(f"La requête a échoué avec le code d'état {response.status_code}")
-
-
-#%%
-recordss = data.get('features', [])
-
-# Extract 'geometry' and 'attribute' into a list of tuples
-combined_data = [(record['geometry'], record['attributes']) for record in recordss]
-
-# Create a DataFrame from the combined data
-df_combined = pd.DataFrame(combined_data, columns=['geometry', 'attribute'])
-# Extract values from 'geometry' and 'attribute'
-df_combined['x'] = df_combined['geometry'].apply(lambda geo: geo['x'])
-df_combined['y'] = df_combined['geometry'].apply(lambda geo: geo['y'])
-df_combined['nom_station'] = df_combined['attribute'].apply(lambda attr: attr['nom_station'])
-# Add more columns as needed
-
-# Drop the original 'geometry' and 'attribute' columns
-df_combined = df_combined.drop(['geometry', 'attribute'], axis=1)
-
-# Display the resulting DataFrame
-df_combined
-
 
 ```
