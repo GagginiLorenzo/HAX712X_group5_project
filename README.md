@@ -77,7 +77,7 @@ def server(input, output, session):
 
 ## Choix des données
 
-La mesure de la quantité d'un polluant dépent du mois et de l'heure à laquelle elle est effectuée. En effet cette quantité dépend du moment de l'année : la consommation de gaz, donc la pollution qu'elle engendre, est plus importante en hiver qu'en été. L'heure de mesure joue aussi son rôle, et à titre d'exemple, on peut citer la pollution générée par les voitures aux heures de pointe. Nous sommes donc contraints de choisir le dataset Atmo intitulé : "Mesures horaires 1 an glissant". Toutefois ce jeu de données ne fonctionnant pas pour les appels API, nous nous sommes rabatttus sur les mesures journalières annuelles et les mesures horaires des derniers 30 jours.  
+La mesure de la quantité d'un polluant dépend du mois et de l'heure à laquelle elle est effectuée. En effet cette quantité dépend du moment de l'année : la consommation de gaz, donc la pollution qu'elle engendre, est plus importante en hiver qu'en été. L'heure de mesure joue aussi son rôle, et à titre d'exemple, on peut citer la pollution générée par les voitures aux heures de pointe. Nous sommes donc contraints de choisir le dataset Atmo intitulé : "Mesures horaires 1 an glissant". Toutefois ce jeu de données ne fonctionnant pas pour les appels API, nous nous sommes rabatttus sur les mesures journalières annuelles et les mesures horaires des 30 derniers jours.  
 
 Une première exploration rapide semble montrer que ce n'est pas du tout le cas sur les données Synop. Si la station d'enregistrement est correcte, le reste par contre laisse à désirer. Toutefois, nous ne nous sommes intéressés qu'à peu de paramètres : pression et température, les autres ne nous semblant pas pertinents.
 
@@ -87,7 +87,7 @@ Le projet est intégré dans une page Quarto. On y retrouve différentes capsule
 
 Voici les différents packages utilisés selon les besoins :
 
-* capsules d'affichage : shiny, shiny, shinywidgets
+* capsules d'affichage : shiny, shinylive, shinywidgets
 * importation des données : pyodide
 * traitement des données : json, pandas, numpy
 * graphiques : matplotlib
@@ -99,5 +99,4 @@ Voici les différents packages utilisés selon les besoins :
 - Bernard-Reymond Guillaume : guillaume.bernard-reymond@etu.umontpellier.fr
 - Hamomi Majda : majda.hamomi@etu.umontpellier.fr
 - Gaggini Lorenzo : lorenzo.gaggini@etu.umontpellier.fr
-- Ollier Julien : julien.ollier@etu.umontpellier.fr
 
