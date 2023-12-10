@@ -1,7 +1,6 @@
 ```{python}
 import requests
 import ipyleaflet
-import ipywidgets as widgets
 import geopandas as gpd
 import random
 import pandas as pd
@@ -9,14 +8,11 @@ import numpy as np
 from datetime import datetime
 import requests
 from branca.colormap import linear
-from folium import Choropleth
-import folium
 from ipyleaflet import Map, GeoJSON
-import ipyleaflet
 import ipywidgets as widgets
-import geopandas as gpd
-import random
 from branca.colormap import LinearColormap
+import ipywidgets
+
 #supprimer les warnings
 pd.options.mode.chained_assignment = None  # default='warn'
  
@@ -80,6 +76,11 @@ geojson_path = "https://france-geojson.gregoiredavid.fr/repo/regions/occitanie/d
 response = requests.get(geojson_path)
 geojson = response.json()
 
+
+colormap= linear.YlOrRd_09.scale(dff['valeur'].min(), dff['valeur'].max())
+# Créer la carte avec ipyleaflet
+mymap = ipyleaflet.Map(center=(43.6, 2.5), zoom=7.5)
+
 def random_color(feature):
     return {
         'color': 'pink',
@@ -89,18 +90,14 @@ def random_color(feature):
 geojson_layer =  GeoJSON(
     data=geojson,
     style={
-        'opacity': 1, 'dashArray': '9', 'fillOpacity': 0.1, 'weight': 1
+        'opacity': 1, 'dashArray': '9', 'fillOpacity': 0.2, 'weight': 1
     },
     hover_style={
         'color': 'white', 'dashArray': '0', 'fillOpacity': 0.5
     },
     style_callback=random_color
 )
-
-
-colormap= linear.YlOrRd_09.scale(dff['valeur'].min(), dff['valeur'].max())
-# Créer la carte avec ipyleaflet
-mymap = ipyleaflet.Map(center=(43.6, 2.5), zoom=7.5)
+mymap.add_layer(geojson_layer)
 # Ajouter la couche de marqueurs à la carte avec des couleurs basées sur l'intensité du polluant
 markers_layer = ipyleaflet.MarkerCluster(
     markers=[
@@ -109,7 +106,7 @@ markers_layer = ipyleaflet.MarkerCluster(
             radius=10,  # Ajustez le rayon selon vos préférences
             color=colormap.rgb_hex_str(row['valeur']),
             fill_color=colormap.rgb_hex_str(row['valeur']),
-            fill_opacity=0.7,
+            fill_opacity=0.9,
             popup=ipywidgets.HTML(value=f"<div style='font-family: Arial; padding: 10px;background-color: #dcffb8;'><strong>Dept: {row['nom_dept']}</strong><br>{row['nom_station']}<br>Polluant: {row['valeur']} µg/m³</div>"),    
             draggable=False,
         )
@@ -118,3 +115,4 @@ markers_layer = ipyleaflet.MarkerCluster(
 )
 
 mymap.add_layer(markers_layer)
+mymap
