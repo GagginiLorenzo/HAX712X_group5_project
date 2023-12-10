@@ -114,8 +114,6 @@ markers_layer = ipyleaflet.MarkerCluster(
 mymap.add_layer(markers_layer)
 
 
-mymap.save("p.html")
-
 
 
 ```
@@ -222,7 +220,7 @@ end_time_global = time.time()
 total_execution_time = end_time_global - start_time_global
 print(f"Temps d'exécution total du code de carte : {total_execution_time:.5f} secondes")
 
-mymap.save("p.html")
+
 
 
 ```
@@ -345,7 +343,6 @@ markers_layer = ipyleaflet.MarkerCluster(
 )
 mymap.add_layer(markers_layer)
 
-mymap.save("p.html")
 
 
 
