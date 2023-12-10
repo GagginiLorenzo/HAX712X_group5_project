@@ -61,7 +61,7 @@ def server(input, output, session):
 
 ```
 
-# description de la licence 
+# Description de la licence MIT
 
  La licence utilisée est MIT (Massachusetts Institute of Technology) qui est une licence open source largement utilisée.elle est mise en fichier dans la branche main.
 
