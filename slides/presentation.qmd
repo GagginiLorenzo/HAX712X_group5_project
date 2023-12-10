@@ -1,12 +1,16 @@
 ---
-title: "Occitanie quality air explorer"
-author: "Abchiche Thiziri - Bernard-Reymond Guillaume - Gaggini Lorenzo - Hamomi Majda "
+title: "Occitanie air quality explorer"
+author: "ABCHICHE Thiziri
+ - BERNARD-REYMOND Guillaume
+ - GAGGINI Lorenzo 
+ - HAMOMI Majda "
 format: 
   revealjs:
     theme: default
     scrollable: true
 
 ---
+
 # Table des matières
    1) Introduction
    2) Traitement des données
@@ -184,6 +188,7 @@ plt.show()
 
 ```
 # Visualisation
+
 
 # Intégration et déploiement
 ## 
