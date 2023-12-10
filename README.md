@@ -1,56 +1,82 @@
 # Occitanie air quality explorer
-L'objectif du projet est de créer une application web dans laquelle il sera possible de visualiser un ou plusieurs graphiques simultanément décrivant l'évolution d'une valeur de polluant en fonction d'une donnée du climat. Tout ceci pourra être conditionné en amont par d'autres choix notamment temporels. Cela permettra de visualiser différents types de graphiques concernant les polluants.
+
+Le projet "Occitanie Air Quality Explorer" intègre deux ensembles de données essentiels, à savoir les données atmosphériques (données ATMO) représentant les niveaux de polluants, et les données météorologiques (données SYNOP) fournissant des informations sur les conditions climatiques. Cette approche combinée  permet aux utilisateurs d'explorer les interactions entre la qualité de l'air et les variables météorologiques.
+L'objectif est de développer un site web interactif permettant aux utilisateurs de visualiser simultanément  plusieurs graphiques décrivant l'évolution d'une valeur de polluant en corrélation avec une donnée climatique spécifique.Il permet également d'afficher une carte interactive  offrant une représentation spatiale des données ATMO. Cette carte permet aux utilisateurs de visualiser la répartition géographique des stations de mesure et de comprendre la variabilité des concentrations de polluants dans la région. 
+
+Découvrez par vous-même la qualité de l'air en Occitanie en visitant notre site web interactif : #lien que tu dois mettre ici Lorenzo
 
 
-```{mermaid}
-flowchart TD
-    A[Zone] --> B[Condition]
-    B --> D[Pollution]
-    B --> E[Climat]
-    E --> G[Graphique]
-    D --> G
+# Extrait de code du site ici : 
+```python
+---
+title: Occitanie Quality Air Explorer
+format: html
+filters:
+  - shinylive
+---
+### Carte des stations d'Occitanie
+::: {.column-page}
+```{shinylive-python}
+#| standalone: true
+#| viewerHeight: 1600
+#| column: page
+
+import matplotlib.pyplot as plt
+import time
+from ipywidgets import HTML, Layout
+import ipyleaflet as L
+import json
+import random
+import pandas as pd
+from io import StringIO  # Importez StringIO depuis io
+from shiny import App, render, ui,reactive 
+from shinywidgets import output_widget, reactive_read, render_widget, register_widget
+import pyodide.http
+import pandas
+from branca.colormap import LinearColormap, linear
+from datetime import datetime
+from shiny import App, Inputs, Outputs, Session, reactive, ui
+polluant_atmos="'O3'","'NO2'","'NO'","'NOX'","'H2S'","'PM10'","'PM2.5'","'SO2'"
+
+app_ui = ui.page_fluid(   
+    ui.input_selectize("condition1", "polluant_atmos", polluant_atmos,multiple = True),
+    ui.output_text_verbatim("info1"),
+    ui.output_text_verbatim("Clicks"),
+    output_widget("map",height='500px'),
+    ui.output_plot("GRAPH_YEAR",height='800px')
+    )
+
+def server(input, output, session):
+
+    def url0():
+        vi=str(city.get())
+        cond1 = "(nom_poll="+ ') AND ('.join(input.condition1())+')'
+        return f"https://services9.arcgis.com/7Sr9Ek9c1QTKmbwr/arcgis/rest/services/Mesure_horaire_(30j)_Region_Occitanie_Polluants_Reglementaires_1/FeatureServer/0/query?where=(nom_com='{vi}')AND{cond1}&outFields=nom_dept,nom_station,nom_com,nom_poll,valeur,date_debut,date_fin&outSR=4326&f=json"
+    @reactive.Calc
+    async def data0():
+        response0 = await pyodide.http.pyfetch(url0())
+        dat = await response0.json()
+        r= dat
+        return r 
+
 ```
 
-Le code s'articulera comme suit :
+# description de la licence 
+
+ La licence utilisée est MIT (Massachusetts Institute of Technology) qui est une licence open source largement utilisée.elle est mise en fichier dans la branche main.
+
+ Permission d'Utilisation : Toute personne qui obtient une copie du logiciel est autorisée à l'utiliser, le copier, le modifier, le fusionner, le publier, le distribuer, le sous-licencier ou le vendre, et ceci gratuitement.
+
+ Conditions de Licence : L'utilisateur doit inclure l'avis de copyright (copyright notice) indiqué dans le texte de la licence ainsi que l'avis de permission (permission notice) dans toutes les copies ou portions substantielles du logiciel.
+
+ Absence de Garantie : Le logiciel est fourni "tel quel", sans aucune garantie. Les auteurs ou détenteurs du copyright ne fournissent aucune garantie explicite ou implicite, y compris, mais sans s'y limiter, les garanties de qualité marchande, d'adéquation à un usage particulier et d'absence de contrefaçon.
+
+ *Responsabilité Limitée : En aucun cas, les auteurs ou détenteurs du copyright ne peuvent être tenus responsables de toute réclamation, dommage ou autre responsabilité, que ce soit dans le cadre d'une action contractuelle, délictuelle ou autre, découlant de l'utilisation du logiciel ou en relation avec celui-ci.
 
 
-```{mermaid}
-flowchart TD
-    A[OpenDataSoft]
-    B[Data Atmo Occitanie]
-    C{{API REST}}
-    D[Jupyter Notebook]
-    E{{Jupyter Widgets}}
-    F{{Quarto}}
-    G[GitHub Pages]
 
-    A-->C
-    B-->C
-    C-->D
-    E-->D
-    D-->F & E
-    F-->G
-```
+ 
 
-De plus, nous créerons une carte intéractive cliquable de la région Occitanie à la précision du canton pour obtenir un traitement suffisamment fin, l'échelle du département étant à priori trop grande. Toutefois, nous serons peut-être amené à changer celà en fonction de l'exploration des données. 
-
-Pour faire tout ça, nous nous organiserons en quatre phases  : 
-
-* **phase 1** : la sélection des données
-    - Restapi : demande python vers url
-    - Parsing : découpage du fichier json en catégorie (date à priori)
-    - Traduction : du json vers PythonDict
-    - Liste des données sélectionnées
-    
-* **phase 2** : Traitement des données
-    - Carte intéractive
-    - Graphique
-    
-* **phase 3** : Interface utilisateur 
-
-* **phase 4** : Documentation, Beamer 
-
-Durant le développement du projet, l'IDE commun sera Jupyter-Notebook.
 
 **Organisation temporelle du projet**
 
@@ -72,7 +98,7 @@ gantt
 ```
 
 
-Nous avons donc créé deux branches et la branche principale(main) correspondant aux trois phases principales du projet :  le traitement des données (data) et la carte interactive (visu) et l'interface utilisateur (main). Ceci nous permettra de travailler en parallèle sur les différents aspects du projet dès que cela sera possible.
+
 
 ## Choix des données
 
@@ -140,7 +166,7 @@ Enfin pour la page web, nous nous servirons Quarto qui sintègre bien à l'ensem
 
 ## Documentation et beamer
 
-Pour la documentation, nous utiliserons la librairie Sphynx et pour la réalisation du diaporama de présentation, nous passerons par l'interface de Quarto. 
+Pour la réalisation du diaporama de présentation, nous utilisons quarto . 
 
 ## Membres et contact
 
@@ -149,15 +175,4 @@ Pour la documentation, nous utiliserons la librairie Sphynx et pour la réalisat
 - Hamomi Majda : majda.hamomi@etu.umontpellier.fr
 - Gaggini Lorenzo : lorenzo.gaggini@etu.umontpellier.fr
 - Ollier Julien : julien.ollier@etu.umontpellier.fr
-<<<<<<< HEAD
 
-
-
-
-
-
-
-
-
-=======
->>>>>>> c513d984d6a8322aad121a5694425d4c3433ca12
