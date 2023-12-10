@@ -3,14 +3,38 @@ project:
   output-dir: docs
   render:
     - /q.qmd
+    - polluants/H2S.qmd
+    - polluants/NOx.qmd
+    - polluants/O3.qmd
+    - polluants/PM.qmd
+    - polluants/SO2.qmd
+
 
 website:
-  title: "Groupe_5_project"
+  title: "Occitanie Quality Air Explorer"
   navbar:
     search: true
     right:
       - icon: github
         href: https://github.com/GagginiLorenzo/HAX712X_group5_project
+
+    left:
+      # - text: "Overview"
+      #   href: index.qmd
+      - sidebar:polluant
+  
+  sidebar:
+    - id: polluant
+      title: "Différents polluants"
+      collapse-level: 3
+      contents:
+        - polluants/H2S.qmd
+        - polluants/NOx.qmd
+        - polluants/O3.qmd
+        - polluants/PM.qmd
+        - polluants/SO2.qmd
+
+
 
 format:
   html:
