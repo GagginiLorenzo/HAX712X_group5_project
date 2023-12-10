@@ -193,6 +193,7 @@ if __name__ == "__main__":
 
 
 #exécution du code dans un terminal
-#Python -m cProfil -o Temp&Memoire .\Temps&Memoire.py
+#Python -m cProfile -o Memoire.prof .\Memoire.py
 #snakeviz .\Memoire.prof
-# python -m cProfile -o output.pstats Memoire.py 
+
+ 
