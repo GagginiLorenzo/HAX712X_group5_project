@@ -26,11 +26,22 @@ if response.status_code == 200:
 else:
     print(f"La requête a échoué avec le code d'état {response.status_code}")
 
-
-#%%
 records = data.get('features', [])
-records_data = [record['attributes'] for record in records]
-df_atmo = pd.DataFrame(records_data)
+# Extract 'geometry' and 'attribute' into a list of tuples
+combined_data = [(record['geometry'], record['attributes']) for record in records]
+# Create a DataFrame from the combined data
+df_combined = pd.DataFrame(combined_data, columns=['geometry', 'attribute'])
+# Extract values from 'geometry' and 'attribute'
+df_combined['x'] = df_combined['geometry'].apply(lambda geo: geo['x'])
+df_combined['y'] = df_combined['geometry'].apply(lambda geo: geo['y'])
+df_combined['nom_station'] = df_combined['attribute'].apply(lambda attr: attr['nom_station'])
+df_combined['nom_poll'] = df_combined['attribute'].apply(lambda attr: attr['nom_poll'])
+df_combined['valeur'] = df_combined['attribute'].apply(lambda attr: attr['valeur'])
+# Add more columns as needed
+#%%
+
+
+df_atmo =df_combined.drop(['geometry', 'attribute'], axis=1)
 
 # liste des villes et des polluants
 villes = df_atmo["nom_station"].unique().tolist()
@@ -59,17 +70,8 @@ dataSO2 = dataSO2_7.groupby(['nom_station', 'nom_poll']).max().reset_index()
 dataNO2 = dataNO2_8.groupby(['nom_station', 'nom_poll']).max().reset_index()
 
 # Charger les données des stations des villes dans la région Occitanie
-df = pd.DataFrame(dataO3)
-data = {
-    "nom_dept": ["ARIEGE", "AVEYRON", "GARD", "GARD", "GARD", "GARD", "GARD", "GERS", "GERS", "GERS"],
-    "nom_com": ["Saint-Girons", "Rodez", "Ales", "LA calmette", "Nimes", "Nimes", "Saze", "Auch", "Gaudonville", "PEYRUSSE-VIEILLE"],
-    "nom_station": ["St-Girons Urbain", "Rodez - Camonil Urbain", "Ales Vauban fond", "La Calmette - Périurbain", "Nîmes - Planas - Trafic", "Nîmes Sud - Urbain", "Saze - rural", "AUCH ST EXUPERY", "Gaudonville Rural", "Peyrusse Vieille Rural"],
-    "x_wgs84": [1.13943, 2.5707, 4.07548, 4.26581, 4.36199, 4.37422, 4.67969, 0.59467, 0.845617, 0.179722],
-    "y_wgs84": [42.99, 44.357, 44.1259, 43.9254, 43.8299, 43.8344, 43.9429, 43.6511, 43.884, 43.6303],
-    "valeur": [20, 100, 30, 12, 60, 18, 7, 9, 11, 39]  # Exemple de données de polluants (à remplacer par vos propres données)
-}
-
-dff = pd.DataFrame(data)
+df = pd.DataFrame(dataNO2)
+df=df.dropna(axis=1)
 
 # Charger les données des départements
 geojson_path = "https://france-geojson.gregoiredavid.fr/repo/regions/occitanie/departements-occitanie.geojson"
@@ -77,7 +79,7 @@ response = requests.get(geojson_path)
 geojson = response.json()
 
 
-colormap= linear.YlOrRd_09.scale(dff['valeur'].min(), dff['valeur'].max())
+colormap= linear.YlOrRd_09.scale(df['valeur'].min(), df['valeur'].max())
 # Créer la carte avec ipyleaflet
 mymap = ipyleaflet.Map(center=(43.6, 2.5), zoom=7.5)
 
@@ -102,27 +104,21 @@ mymap.add_layer(geojson_layer)
 markers_layer = ipyleaflet.MarkerCluster(
     markers=[
         ipyleaflet.CircleMarker(
-            location=(row['y_wgs84'], row['x_wgs84']),
+            location=(row['y'], row['x']),
             radius=10,  # Ajustez le rayon selon vos préférences
             color=colormap.rgb_hex_str(row['valeur']),
             fill_color=colormap.rgb_hex_str(row['valeur']),
             fill_opacity=0.9,
-            popup=ipywidgets.HTML(value=f"<div style='font-family: Arial; padding: 10px;background-color: #dcffb8;'><strong>Dept: {row['nom_dept']}</strong><br>{row['nom_station']}<br>Polluant: {row['valeur']} µg/m³</div>"),    
+            popup=ipywidgets.HTML(value=f"<div style='font-family: Arial; padding: 10px;background-color: #dcffb8;'><strong>{row['nom_station']}</strong>"),    
             draggable=False,
         )
-        for _, row in dff.iterrows()
+        for _, row in df.iterrows()
     ]
 )
 mymap.add_layer(markers_layer)
-import pandas as pd
-
-station = pd.read_csv("station.csv")
-sta = station[~station['NOM_STATION'].str.contains("-", na=False)]
-D = df[~df['nom_station'].str.contains("-", na=False)]
-result = pd.merge(sta, D, left_on='NOM_STATION', right_on='nom_station')
-station
 
 
+mymap
 
 
 ```
@@ -143,12 +139,22 @@ else:
 #%%
 recordss = data.get('features', [])
 
-# Extract 'geometry' and 'attribute' data
-records_data = [{'geometry': record['geometry'], 'attribute': record['attribute']} for record in recordss]
+# Extract 'geometry' and 'attribute' into a list of tuples
+combined_data = [(record['geometry'], record['attributes']) for record in recordss]
 
-# Create a DataFrame from the extracted data
-dfs = pd.DataFrame(records_data)
-dfs
+# Create a DataFrame from the combined data
+df_combined = pd.DataFrame(combined_data, columns=['geometry', 'attribute'])
+# Extract values from 'geometry' and 'attribute'
+df_combined['x'] = df_combined['geometry'].apply(lambda geo: geo['x'])
+df_combined['y'] = df_combined['geometry'].apply(lambda geo: geo['y'])
+df_combined['nom_station'] = df_combined['attribute'].apply(lambda attr: attr['nom_station'])
+# Add more columns as needed
+
+# Drop the original 'geometry' and 'attribute' columns
+df_combined = df_combined.drop(['geometry', 'attribute'], axis=1)
+
+# Display the resulting DataFrame
+df_combined
 
 
 ```
