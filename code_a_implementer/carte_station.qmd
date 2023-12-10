@@ -1,0 +1,120 @@
+```{python}
+import requests
+import ipyleaflet
+import ipywidgets as widgets
+import geopandas as gpd
+import random
+import pandas as pd
+import numpy as np
+from datetime import datetime
+import requests
+from branca.colormap import linear
+from folium import Choropleth
+import folium
+from ipyleaflet import Map, GeoJSON
+import ipyleaflet
+import ipywidgets as widgets
+import geopandas as gpd
+import random
+from branca.colormap import LinearColormap
+#supprimer les warnings
+pd.options.mode.chained_assignment = None  # default='warn'
+ 
+
+url = "https://services9.arcgis.com/7Sr9Ek9c1QTKmbwr/arcgis/rest/services/mesures_occitanie_mensuelle_poll_princ/FeatureServer/0/query?where=1%3D1&outFields=nom_com,nom_dept,nom_station,x_l93,y_l93,nom_poll,valeur&outSR=4326&f=json"
+
+response = requests.get(url)
+
+if response.status_code == 200:
+    data = response.json()
+else:
+    print(f"La requête a échoué avec le code d'état {response.status_code}")
+
+
+#%%
+records = data.get('features', [])
+records_data = [record['attributes'] for record in records]
+df_atmo = pd.DataFrame(records_data)
+
+# liste des villes et des polluants
+villes = df_atmo["nom_station"].unique().tolist()
+villes.sort()
+polluants = df_atmo["nom_poll"].unique().tolist()
+polluants.sort()
+df_atmo["nom_station"]=df_atmo["nom_station"].str.title()
+d= dict(tuple(df_atmo.groupby('nom_poll')))
+dataO3_1 = d['O3']
+dataPM10_2 = d['PM10']
+dataNOX_3 = d['NOX']
+dataPM25_4 = d['PM2.5']
+dataNO_5 = d['NO']
+dataH2S_6 = d['H2S']
+dataSO2_7 = d['SO2']
+dataNO2_8= d['NO2']
+
+# Créer un nouveau DataFrame avec les résultats
+dataO3 = dataO3_1.groupby(['nom_station', 'nom_poll']).max().reset_index()
+dataPM10 =dataPM10_2.groupby(['nom_station', 'nom_poll']).max().reset_index()
+dataNOX = dataNOX_3.groupby(['nom_station', 'nom_poll']).max().reset_index()
+dataPM25 = dataPM25_4.groupby(['nom_station', 'nom_poll']).max().reset_index()
+dataNO = dataNO_5.groupby(['nom_station', 'nom_poll']).max().reset_index()
+dataH2S = dataH2S_6.groupby(['nom_station', 'nom_poll']).max().reset_index()
+dataSO2 = dataSO2_7.groupby(['nom_station', 'nom_poll']).max().reset_index()
+dataNO2 = dataNO2_8.groupby(['nom_station', 'nom_poll']).max().reset_index()
+
+# Charger les données des stations des villes dans la région Occitanie
+df = pd.DataFrame(dataO3)
+data = {
+    "nom_dept": ["ARIEGE", "AVEYRON", "GARD", "GARD", "GARD", "GARD", "GARD", "GERS", "GERS", "GERS"],
+    "nom_com": ["Saint-Girons", "Rodez", "Ales", "LA calmette", "Nimes", "Nimes", "Saze", "Auch", "Gaudonville", "PEYRUSSE-VIEILLE"],
+    "nom_station": ["St-Girons Urbain", "Rodez - Camonil Urbain", "Ales Vauban fond", "La Calmette - Périurbain", "Nîmes - Planas - Trafic", "Nîmes Sud - Urbain", "Saze - rural", "AUCH ST EXUPERY", "Gaudonville Rural", "Peyrusse Vieille Rural"],
+    "x_wgs84": [1.13943, 2.5707, 4.07548, 4.26581, 4.36199, 4.37422, 4.67969, 0.59467, 0.845617, 0.179722],
+    "y_wgs84": [42.99, 44.357, 44.1259, 43.9254, 43.8299, 43.8344, 43.9429, 43.6511, 43.884, 43.6303],
+    "valeur": [20, 100, 30, 12, 60, 18, 7, 9, 11, 39]  # Exemple de données de polluants (à remplacer par vos propres données)
+}
+
+dff = pd.DataFrame(data)
+
+# Charger les données des départements
+geojson_path = "https://france-geojson.gregoiredavid.fr/repo/regions/occitanie/departements-occitanie.geojson"
+response = requests.get(geojson_path)
+geojson = response.json()
+
+def random_color(feature):
+    return {
+        'color': 'pink',
+        'fillColor': random.choice(['red', 'yellow', 'green', 'orange']),
+    }
+# Ajouter la couche GeoJSON à la carte
+geojson_layer =  GeoJSON(
+    data=geojson,
+    style={
+        'opacity': 1, 'dashArray': '9', 'fillOpacity': 0.1, 'weight': 1
+    },
+    hover_style={
+        'color': 'white', 'dashArray': '0', 'fillOpacity': 0.5
+    },
+    style_callback=random_color
+)
+
+
+colormap= linear.YlOrRd_09.scale(dff['valeur'].min(), dff['valeur'].max())
+# Créer la carte avec ipyleaflet
+mymap = ipyleaflet.Map(center=(43.6, 2.5), zoom=7.5)
+# Ajouter la couche de marqueurs à la carte avec des couleurs basées sur l'intensité du polluant
+markers_layer = ipyleaflet.MarkerCluster(
+    markers=[
+        ipyleaflet.CircleMarker(
+            location=(row['y_wgs84'], row['x_wgs84']),
+            radius=10,  # Ajustez le rayon selon vos préférences
+            color=colormap.rgb_hex_str(row['valeur']),
+            fill_color=colormap.rgb_hex_str(row['valeur']),
+            fill_opacity=0.7,
+            popup=ipywidgets.HTML(value=f"<div style='font-family: Arial; padding: 10px;background-color: #dcffb8;'><strong>Dept: {row['nom_dept']}</strong><br>{row['nom_station']}<br>Polluant: {row['valeur']} µg/m³</div>"),    
+            draggable=False,
+        )
+        for _, row in dff.iterrows()
+    ]
+)
+
+mymap.add_layer(markers_layer)
