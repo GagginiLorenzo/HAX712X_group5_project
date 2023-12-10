@@ -23,7 +23,7 @@ format:
 
 **Objectifs :** un site interactif avec :
 
-   * des graphiques de différents polluants et de données météorologiques pour essayer de voir l'influence de la méteo sur la pollution
+   * des graphiques de différents polluants et de données météorologiques pour essayer de voir l'influence de certains paramètres météorologiques sur la pollution
    * une carte intéractive permettant de sélectionner une ville pour afficher les graphiques
 
 ::: {.notes}
@@ -34,7 +34,7 @@ format:
 
 Deux jeux de données :
 
-   * **Atmos** : mesures de différents polluants dans la région occitanie. De nombreux choix de types de relevés
+   * **Atmos** : mesures de différents polluants dans la région Occitanie. De nombreux choix de types de relevés.
    * **Synop** : données météorologiques partout en France : sélection obligatoire.
 
 ## Atmos
@@ -143,7 +143,7 @@ def graphique(ville, polluant):
 
 ### Représentation selon la typologie de la station de mesure
 
-**Objectif :** Visualiser dans quel type d'environnement la pollution par une substance était la plus importante
+**Objectif :** Visualiser la part de pollution des différents types d'émetteurs
 
 **Résultat :**
 
@@ -183,6 +183,9 @@ ax.set_ylim(0, 90)
 plt.show()
 
 ```
+
+
+
 # Visualisation
 
 # Intégration et déploiement
