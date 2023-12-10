@@ -1,18 +1,17 @@
-# Traitement typo api
-
-# %%
-import pandas as pd
-import numpy as np
-from datetime import datetime
+import cProfile
+from memory_profiler import profile
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from datetime import datetime
 import requests
 
-# %%
-# supprimer les warnings
+# Fonction "graph_influ"
+
+# Supprimer les warnings
 pd.options.mode.chained_assignment = None  # default='warn'
 
-# %%
-# telechargement des données
+# Téléchargement des données
 url = "https://services9.arcgis.com/7Sr9Ek9c1QTKmbwr/arcgis/rest/services/Mesure_horaire_(30j)_Region_Occitanie_Polluants_Reglementaires_1/FeatureServer/0/query?where=1%3D1&outFields=nom_com,nom_poll,valeur,influence,date_debut&outSR=4326&f=json"
 
 response = requests.get(url)
@@ -22,27 +21,33 @@ if response.status_code == 200:
 else:
     print(f"La requête a échoué avec le code d'état {response.status_code}")
 
-
-# %%
-# trasformation données
+# Transformation des données
 records = data.get('features', [])
 records_data = [record['attributes'] for record in records]
 df_atmo = pd.DataFrame(records_data)
-print(df_atmo)
 
-# %%
-# graphique de la valeur des polluants selon le type de mesure
-# on regroupe les valeurs selon l'influence en moyennisant
+# Définir la variable "villes"
+villes = "nom_com"  # Remplacez par le nom de la ville que vous souhaitez
+
+# Fonction "graph_influ"
 def graph_influ(villes):
-    pol_influ = df_atmo.loc[df_atmo["nom_com"] == villes]
-    print(pol_influ)
+    if 'influence' not in df_atmo.columns:
+        print("La colonne 'influence' n'est pas présente dans le DataFrame.")
+        return
+
+    pol_influ = df_atmo.loc[df_atmo["nom_com"] == villes, ['influence', 'nom_poll', 'valeur']]
+    
+    if pol_influ.empty:
+        print(f"Aucune donnée disponible pour la ville {villes}.")
+        return
+    pol_influ = df_atmo.loc[df_atmo["nom_com"] == villes, ['influence', 'nom_poll', 'valeur']]
     pol_influ = pol_influ.groupby(['influence', 'nom_poll'])['valeur'].mean().round(1).unstack(level=0)
     polluants = pol_influ.index.tolist()
-    # position des labels et tracé du graphique
+    # Position des labels et tracé du graphique
     x = np.arange(len(polluants)) + 1  # the label locations
     width = 0.25  # the width of the bars
     multiplier = 0
-    fig, ax = plt.subplots(layout='constrained')
+    fig, ax = plt.subplots()
     for attribute, measurement in pol_influ.items():
         print(f"Attribute: {attribute}")
         print(f"Measurement:\n{measurement}")
@@ -53,24 +58,24 @@ def graph_influ(villes):
     ax.set_ylabel('µg/m³')
     ax.set_title('Influence du type de mesure à ' + str(villes))
     ax.set_xticks(x + width/2, polluants)
-    ax.legend(loc='upper left') #ncols=3
+    ax.legend(loc='upper left')
     ax.set_ylim(0, 160)
-plt.show()
-# %% 
+    plt.show()
 
-#Traitement week api
+# Profilage de la fonction "graph_influ"
+@profile
+def profile_graph_influ():
+    profiler_graph_influ = cProfile.Profile()
+    profiler_graph_influ.enable()
+    graph_influ(villes)
+    profiler_graph_influ.disable()
+    profiler_graph_influ.dump_stats('My_Website_prof_graph_influ.prof')
 
-# %%
-import pandas as pd
-from datetime import datetime
-import matplotlib.pyplot as plt
-import requests
+# Fonction "selection"
 
-# %%
-# supprimer les warnings
+# Supprimer les warnings
 pd.options.mode.chained_assignment = None  # default='warn'
 
-# %%
 url = "https://services9.arcgis.com/7Sr9Ek9c1QTKmbwr/arcgis/rest/services/Mesure_horaire_(30j)_Region_Occitanie_Polluants_Reglementaires_1/FeatureServer/0/query?where=1%3D1&outFields=nom_com,nom_station,nom_poll,valeur,date_debut&outSR=4326&f=json"
 
 response = requests.get(url)
@@ -80,20 +85,18 @@ if response.status_code == 200:
 else:
     print(f"La requête a échoué avec le code d'état {response.status_code}")
 
-
-# %%
 records = data.get("features", [])
 records_data = [record["attributes"] for record in records]
 df_atmo = pd.DataFrame(records_data)
+
+ville = "nom_com"
 
 df_atmo["date_debut"] = df_atmo["date_debut"] / 1000
 df_atmo["date_debut"] = df_atmo["date_debut"].apply(
     lambda _: datetime.utcfromtimestamp(_)
 )
 
-
-
-# fonction qui fait la sélection ville et polluant
+# Fonction qui fait la sélection "ville" et "polluant"
 def selection(ville, polluant):
     if ville == "MONTPELLIER":
         df_atmo["nom_station"] = df_atmo["nom_station"].replace(
@@ -104,12 +107,27 @@ def selection(ville, polluant):
     ]
     return df_1
 
+# Profilage de la fonction "selection"
+@profile
+def profile_selection():
+    profiler_selection = cProfile.Profile()
+    profiler_selection.enable()
+    # Appel de la fonction à profiler
+    df_selection = selection(ville, "Nom_du_polluant")
+    profiler_selection.disable()
+    profiler_selection.dump_stats('My_Website_prof_selection.prof')
+
+# Fonction "graphique"
 
 # Fonction qui trace le graphique
 def graphique(ville, polluant):
     df_pv = selection(ville, polluant)
     stations = df_pv["nom_station"].unique()
     nb_stations = len(stations)
+
+    if nb_stations < 1:
+        print(f"Aucune donnée disponible pour la ville {ville} et le polluant {polluant}.")
+        return
 
     if nb_stations == 1:
         # Créer une seule sous-figure
@@ -119,28 +137,28 @@ def graphique(ville, polluant):
         fig, axes = plt.subplots(nb_stations, 1, figsize=(10, 15), sharex=True)
 
     fig.suptitle(
-        "Pollution selon le jour de la semaine à " + str(villes), fontsize=16)
-    # pour la légende
+        "Pollution selon le jour de la semaine à " + str(ville), fontsize=16)
+    # Pour la légende
     jour = ["lundi", "mardi", "mercredi",
             "jeudi", "vendredi", "samedi", "dimanche"]
     for i in range(nb_stations):
-        # on ne garde que les données concernant la station en question
+        # On ne garde que les données concernant la station en question
         df_pvs = df_pv.loc[df_pv["nom_station"] == stations[i]]
-        # conversion du datetime unix en datetime
+        # Conversion du datetime unix en datetime
         df_pvs["date_debut"] = df_pvs["date_debut"].apply(
             lambda _: datetime.utcfromtimestamp(_ / 1000)
         )
-        # on reindexe par le datetime
+        # On reindexe par le datetime
         df_pvs = df_pvs.set_index(["date_debut"])
-        # colonne avec le numéro des jours
+        # Colonne avec le numéro des jours
         df_pvs["weekday"] = df_pvs.index.weekday
-        # on regroupe par jour et on fait la moyenne
+        # On regroupe par jour et on fait la moyenne
         pollution_week = (
             df_pvs.groupby(["weekday", df_pvs.index.hour])["valeur"]
             .mean()
             .unstack(level=0)
         )
-        # labellisation et légende
+        # Labellisation et légende
         axes[i].plot(pollution_week)
         axes[i].set_xticks(np.arange(0, 24))
         axes[i].set_xticklabels(np.arange(0, 24), rotation=45)
@@ -154,9 +172,27 @@ def graphique(ville, polluant):
         axes[i].grid(True)
 
     plt.show()
- 
-
- 
 
 
+# Profilage de la fonction "graphique"
+@profile
+def profile_graphique():
+    profiler_graphique = cProfile.Profile()
+    profiler_graphique.enable()
+    # Appel de la fonction à profiler
+    graphique("nom_com", "Nom_du_polluant")
+    profiler_graphique.disable()
+    profiler_graphique.dump_stats('My_Website_prof_graphique.prof')
 
+if __name__ == "__main__":
+    # Appel des fonctions à profiler
+    profile_graph_influ()
+    profile_selection()
+    profile_graphique()
+
+
+
+#exécution du code dans un terminal
+#Python -m cProfil -o Temp&Memoire .\Temps&Memoire.py
+#snakeviz .\Memoire.prof
+# python -m cProfile -o output.pstats Memoire.py 
