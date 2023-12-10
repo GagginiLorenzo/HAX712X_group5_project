@@ -187,36 +187,26 @@ ax.set_ylim(0, 90)
 plt.show()
 
 ```
-## Visualisation
+# Visualisation
 <!-- Diapositive 1 -->
-###### Premier aperçu de la division par département de la carte de la région Occitanie
-</center>
+##### Premier aperçu de la division par département de la carte de la région Occitanie, présenté sur cette figure interactive
+<center>
   <img src="./Images/fig1.PNG" alt="Description de l'image" style="width: 70%; height: auto;">
 </center>
 
 <!-- Diapositive 2 -->
-## Titre de la diapositive 2
+##### Visualisation des concentrations du polluant O3 à travers les différentes stations de mesure dans la région Occitanie.
 
 <center>
-  <img src="./Images/im2O3.PNG" alt="Description de l'image" style="width: 50%; height: auto;">
+  <img src="./Images/imO3.PNG" alt="Description de l'image" style="width: 70%; height: auto;">
 </center>
 
-<!-- Diapositive avec deux images côte à côte -->
-## Titre de la diapositive 3
+<!-- Diapositive 3 -->
+##### Analyse détaillée des niveaux de pollution en 03 au sein d'une station spécifique.
 
-<div style="display: flex; justify-content: space-between;">
-
-  <!-- Image à gauche -->
-  <div style="width: 48%;">
-    <img src="./Images/im3O3.PNG" alt="Description de l'image 3" style="width: 100%; height: auto;">
-  </div>
-
-  <!-- Image à droite -->
-  <div style="width: 48%;">
-    <img src="./Images/im4O3.PNG" alt="Description de l'image 4" style="width: 100%; height: auto;">
-  </div>
-
-</div>
+<center>
+  <img src="./Images/im2O3.PNG" alt="Description de l'image" style="width: 70%; height: auto;">
+</center>
 
 
 # Intégration et déploiement

@@ -66,7 +66,7 @@ dataSO2 = dataSO2_7.groupby(['nom_station', 'nom_poll']).max().reset_index()
 dataNO2 = dataNO2_8.groupby(['nom_station', 'nom_poll']).max().reset_index()
 
 # Charger les données des stations des villes dans la région Occitanie
-df=  pd.DataFrame(dataNO2).dropna(subset=['valeur'])
+df=  pd.DataFrame(dataO3).dropna(subset=['valeur'])
 
 
 # Charger les données des départements
