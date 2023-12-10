@@ -62,15 +62,8 @@ dataH2S = dataH2S_6.groupby(['nom_station', 'nom_poll']).max().reset_index()
 dataSO2 = dataSO2_7.groupby(['nom_station', 'nom_poll']).max().reset_index()
 dataNO2 = dataNO2_8.groupby(['nom_station', 'nom_poll']).max().reset_index()
 
-
 # Charger les données des stations des villes dans la région Occitanie
-
 df = pd.DataFrame(dataO3)
-
-geojson_path = "https://france-geojson.gregoiredavid.fr/repo/regions/occitanie/departements-occitanie.geojson"
-response = requests.get(geojson_path)
-geojson = response.json()
-
 data = {
     "nom_dept": ["ARIEGE", "AVEYRON", "GARD", "GARD", "GARD", "GARD", "GARD", "GERS", "GERS", "GERS"],
     "nom_com": ["Saint-Girons", "Rodez", "Ales", "LA calmette", "Nimes", "Nimes", "Saze", "Auch", "Gaudonville", "PEYRUSSE-VIEILLE"],
@@ -81,6 +74,28 @@ data = {
 }
 
 dff = pd.DataFrame(data)
+
+# Charger les données des départements
+geojson_path = "https://france-geojson.gregoiredavid.fr/repo/regions/occitanie/departements-occitanie.geojson"
+response = requests.get(geojson_path)
+geojson = response.json()
+
+def random_color(feature):
+    return {
+        'color': 'pink',
+        'fillColor': random.choice(['red', 'yellow', 'green', 'orange']),
+    }
+# Ajouter la couche GeoJSON à la carte
+geojson_layer =  GeoJSON(
+    data=geojson,
+    style={
+        'opacity': 1, 'dashArray': '9', 'fillOpacity': 0.1, 'weight': 1
+    },
+    hover_style={
+        'color': 'white', 'dashArray': '0', 'fillOpacity': 0.5
+    },
+    style_callback=random_color
+)
 
 
 colormap= linear.YlOrRd_09.scale(dff['valeur'].min(), dff['valeur'].max())
