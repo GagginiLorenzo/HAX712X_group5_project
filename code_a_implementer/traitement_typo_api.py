@@ -55,3 +55,33 @@ def graph_influ(villes):
     ax.set_ylim(0, 160)
 plt.show()
 # %%
+graph_influ("MONTPELLIER")
+# %%
+######graphe inter
+import plotly.express as px
+
+def graph_influ(villes):
+    pol_influ = df_atmo.loc[df_atmo["nom_com"] == villes]
+    pol_influ = pol_influ.groupby(['influence', 'nom_poll'])['valeur'].mean().round(1).unstack(level=0)
+    
+    fig = px.bar(pol_influ, x=pol_influ.index, y=pol_influ.columns, barmode='group', labels={'y': 'µg/m³'},
+                 title='Influence du type de mesure à ' + str(villes))
+    
+    fig.update_layout(
+        xaxis=dict(tickmode='array', tickvals=list(range(1, len(pol_influ.index) + 1)), ticktext=pol_influ.index),
+        xaxis_title='Polluants',
+        yaxis_title='µg/m³',
+        legend=dict(title='Influence'),
+        showlegend=True
+    )
+
+    fig.show()
+
+# Exemple d'utilisation
+graph_influ("MONTPELLIER")
+
+
+# %%
+
+
+# %%

@@ -94,5 +94,65 @@ def graphique(ville, polluant):
 
     plt.show()
 
+graphique("MONTPELLIER", "PM10")
+# %%
+
+
+
+
+
+
 
 # %%
+#graphe interact
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+
+def graphique(ville, polluant):
+    #sélection : pas utile
+    df_pv = selection(ville, polluant)
+    
+    # Vérifier s'il y a au moins une station
+    if df_pv.empty:
+        print(f"Aucune donnée disponible pour {ville} et {polluant}.")
+        return
+
+    #les différentes stations
+    nom_stations = df_pv["nom_station"].unique()
+    nb_stations = len(nom_stations)
+
+    # Créer un subplot interactif avec des sous-graphiques partageant l'axe X
+    fig = make_subplots(rows=nb_stations, cols=1, shared_xaxes=True,
+                        subplot_titles=[f"Concentration du {polluant} à {station}" for station in nom_stations],
+                        vertical_spacing=0.1)
+
+    for i, station in enumerate(nom_stations):
+        #on garde seulement les données de la station i
+        df_pvs = df_pv.loc[df_pv["nom_station"] == station]
+        #transformation en datetime de date_debut
+        #df_pvs["date_debut"] = pd.to_datetime(df_pvs["date_debut"])
+        #datetime devient index
+        df_pvs = df_pvs.set_index(["date_debut"])
+        #on moyennise par jour
+        df_resampled = df_pvs["valeur"].resample("d").mean()
+
+        # Ajouter une trace à chaque sous-graphique
+        trace = go.Scatter(x=df_resampled.index, y=df_resampled, mode='lines',
+                           name=f"Concentration à {station}",
+                           line=dict(width=2))
+        fig.add_trace(trace, row=i+1, col=1)
+
+        # Mettre à jour les propriétés de la mise en page du sous-graphique
+        fig.update_xaxes(title_text="Date", row=i+1, col=1)
+        fig.update_yaxes(title_text="Concentration en µg/m3", row=i+1, col=1)
+        fig.update_layout(height=nb_stations*300, showlegend=False)
+
+    # Mettre à jour le titre général
+    fig.update_layout(title=f"Pollution au {polluant} à {ville}",
+                      title_x=0.5, title_font_size=20)
+
+    # Afficher le graphique interactif
+    fig.show()
+
+# Exemple d'utilisation
+graphique("MONTPELLIER", "PM10")
