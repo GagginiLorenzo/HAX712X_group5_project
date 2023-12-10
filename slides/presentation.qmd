@@ -1,9 +1,9 @@
 ---
-title: "Occitanie air quality explorer"
-author: "ABCHICHE Thiziri
- - BERNARD-REYMOND Guillaume
- - GAGGINI Lorenzo 
- - HAMOMI Majda "
+title: "<p style='font-size: 100px; color: #3366cc;'>Occitanie air quality explorer</p>"
+author: ABCHICHE Thiziri
+        BERNARD-REYMOND Guillaume
+        GAGGINI Lorenzo 
+        HAMOMI Majda
 format: 
   revealjs:
     theme: default
