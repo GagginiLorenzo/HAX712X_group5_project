@@ -104,7 +104,7 @@ graphique("MONTPELLIER", "PM10")
 
 
 # %%
-#graphe inter
+#graphe interact
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
