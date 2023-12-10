@@ -1,92 +1,114 @@
-```{python}
-import folium
-import json
-import random
 import pandas as pd
-from io import StringIO  # Importez StringIO depuis io
+import numpy as np
+from datetime import datetime
+import matplotlib.pyplot as plt
+import requests
+import random
+import geopandas as gpd
+from branca.colormap import linear
+from ipyleaflet import Map, GeoJSON, Marker, CircleMarker, MarkerCluster
+import ipywidgets
 
-# Charger les données depuis le CSV
-data = """nom_dept,nom_com,nom_station,x_wgs84,y_wgs84
-ARIEGE,SAINT-GIRONS,St-Girons Urbain,1.13943,42.99
-AVEYRON,RODEZ,Rodez - Camonil Urbain,2.5707,44.357
-GARD,ALES,Ales Vauban fond,4.07548,44.1259
-GARD,LA CALMETTE,La Calmette - Périurbain,4.26581,43.9254
-GARD,NIMES,Nîmes - Planas - Trafic,4.36199,43.8299
-GARD,NIMES,Nîmes Sud - Urbain,4.37422,43.8344
-GARD,SAZE,Saze - rural,4.67969,43.9429
-GERS,AUCH,AUCH ST EXUPERY,0.59467,43.6511
-GERS,GAUDONVILLE,Gaudonville Rural,0.845617,43.884
-GERS,PEYRUSSE-VIEILLE,Peyrusse Vieille Rural,0.179722,43.6303
-HAUTE-GARONNE,BELESTA-EN-LAURAGAIS,Belesta en Lauragais Rural,1.82194,43.4414
-HAUTE-GARONNE,BESSIERES,Bessières-ECONOTRE Industriel,1.59583,43.8039
-HAUTE-GARONNE,BLAGNAC,Blagnac Aéroport Piste ,1.37725,43.6253
-HAUTE-GARONNE,BLAGNAC,Blagnac Aéroport Trafic ,1.37572,43.6335
-HAUTE-GARONNE,MIRAMONT-DE-COMMINGES,Saint Gaudens-Miramont Industriel,0.744722,43.0944
-HAUTE-GARONNE,MONTGISCARD,Montgiscard Périurbain,1.57111,43.4575
-HAUTE-GARONNE,SAINT-GAUDENS,Saint Gaudens-Daurat Industriel,0.718889,43.1064
-HAUTE-GARONNE,TOULOUSE,Station Pedagogique,1.38541,43.597
-HAUTE-GARONNE,TOULOUSE,Toulouse - Port de l Embouchure Trafic,1.41518,43.6103
-HAUTE-GARONNE,TOULOUSE,Toulouse - Rte Albi Trafic,1.46765,43.6431
-HAUTE-GARONNE,TOULOUSE,Toulouse-Berthelot Urbain,1.44403,43.5873
-HAUTE-GARONNE,TOULOUSE,Toulouse-Jacquier Urbain,1.41807,43.5757
-HAUTE-GARONNE,TOULOUSE,Toulouse-Mazades Urbain,1.43861,43.6236
-HAUTE-GARONNE,TOULOUSE,Toulouse-Périphérique Trafic,1.44959,43.574
-HAUTE-GARONNE,TOULOUSE,Toulouse-SETMI Chapitre Industriel,1.40392,43.5564
-HAUTE-GARONNE,TOULOUSE,Toulouse-SETMI Eisenhower Industriel,1.39326,43.5616
-HAUTES-PYRENEES,ARGELES-GAZOST,Argeles-Gazost,-0.0950538,43.0075
-HAUTES-PYRENEES,LOURDES,Lourdes-Lapaca Urbain,-0.038889,43.0969
-HAUTES-PYRENEES,TARBES,Tarbes-Dupuy Urbain,0.062222,43.2303
-HERAULT,AGDE,Agathois-Piscénois - Périurbain,3.50483,43.2878
-HERAULT,BEZIERS,Beziers Leclerc trafic,3.23734,43.3412
-HERAULT,CORNEILHAN,Biterrois-Narbonnais - Rural,3.18881,43.4068
-HERAULT,LATTES,Montpellier Sud - Périurbain,3.91156,43.5706
-HERAULT,LUNEL-VIEL,Lunel-Viel - Industriel,4.08842,43.6758
-HERAULT,MONTPELLIER,Montpelier Antigone Trafic,3.89574,43.6088
-HERAULT,MONTPELLIER,Montpellier - Chaptal Urbain,3.86472,43.6117
-HERAULT,MONTPELLIER,Montpellier - Pompignane Trafic,3.89861,43.61
-HERAULT,MONTPELLIER,Montpellier - Prés d Arènes Urbain,3.88689,43.5915
-HERAULT,MONTPELLIER,Montpellier - Saint Denis Trafic,3.8746,43.605
-"""
+# URL des données pour la région Occitanie
+url_occitanie = "https://services9.arcgis.com/7Sr9Ek9c1QTKmbwr/arcgis/rest/services/mesures_occitanie_mensuelle_poll_princ/FeatureServer/0/query?where=1%3D1&outFields=nom_com,nom_dept,nom_station,nom_poll,valeur&outSR=4326&f=json"
 
-# Charger les données dans un DataFrame pandas
-df = pd.read_csv(StringIO(data))  # Utilisez StringIO depuis io  
-# Charger le fichier GeoJSON
-geojson_path = "departements-occitanie.geojson"
+# Obtenir les données depuis l'URL
+response_occitanie = requests.get(url_occitanie)
 
-with open(geojson_path) as f:
-    geojson_data = json.load(f)
+# Vérifier si la requête a réussi
+if response_occitanie.status_code == 200:
+    data_occitanie = response_occitanie.json()
+else:
+    print(f"La requête a échoué avec le code d'état {response_occitanie.status_code}")
 
+# Extraire les enregistrements des données
+records_occitanie = data_occitanie.get('features', [])
 
-# Créer une carte centrée sur la région Occitanie
-m = folium.Map(location=[43.6, 1.44], zoom_start=8)
+# Créer un DataFrame avec les données combinées
+combined_data_occitanie = [(record['geometry'], record['attributes']) for record in records_occitanie]
+df_combined_occitanie = pd.DataFrame(combined_data_occitanie, columns=['geometry', 'attribute'])
+df_combined_occitanie['x'] = df_combined_occitanie['geometry'].apply(lambda geo: geo['x'])
+df_combined_occitanie['y'] = df_combined_occitanie['geometry'].apply(lambda geo: geo['y'])
+df_combined_occitanie['nom_station'] = df_combined_occitanie['attribute'].apply(lambda attr: attr['nom_station'])
+df_combined_occitanie['nom_poll'] = df_combined_occitanie['attribute'].apply(lambda attr: attr['nom_poll'])
+df_combined_occitanie['valeur'] = df_combined_occitanie['attribute'].apply(lambda attr: attr['valeur'])
+df_atmo_occitanie = df_combined_occitanie.drop(['geometry', 'attribute'], axis=1)
 
-# Fonction de style pour assigner une couleur aléatoire à chaque département
-def style_function(feature):
-    # Générez une couleur aléatoire au format hexadécimal
-    color = "#{:06x}".format(random.randint(0, 0xFFFFFF))
-    
+# Liste des villes et des polluants
+villes_occitanie = df_atmo_occitanie["nom_station"].unique().tolist()
+villes_occitanie.sort()
+polluants_occitanie = df_atmo_occitanie["nom_poll"].unique().tolist()
+polluants_occitanie.sort()
+df_atmo_occitanie["nom_station"] = df_atmo_occitanie["nom_station"].str.title()
+d_occitanie = dict(tuple(df_atmo_occitanie.groupby('nom_poll')))
+dataO3_1_occitanie = d_occitanie['O3']
+dataPM10_2_occitanie = d_occitanie['PM10']
+dataNOX_3_occitanie = d_occitanie['NOX']
+dataPM25_4_occitanie = d_occitanie['PM2.5']
+dataNO_5_occitanie = d_occitanie['NO']
+dataH2S_6_occitanie = d_occitanie['H2S']
+dataSO2_7_occitanie = d_occitanie['SO2']
+dataNO2_8_occitanie = d_occitanie['NO2']
+
+# Créer un nouveau DataFrame avec les résultats
+dataO3_occitanie = dataO3_1_occitanie.groupby(['nom_station', 'nom_poll']).max().reset_index()
+dataPM10_occitanie = dataPM10_2_occitanie.groupby(['nom_station', 'nom_poll']).max().reset_index()
+dataNOX_occitanie = dataNOX_3_occitanie.groupby(['nom_station', 'nom_poll']).max().reset_index()
+dataPM25_occitanie = dataPM25_4_occitanie.groupby(['nom_station', 'nom_poll']).max().reset_index()
+dataNO_occitanie = dataNO_5_occitanie.groupby(['nom_station', 'nom_poll']).max().reset_index()
+dataH2S_occitanie = dataH2S_6_occitanie.groupby(['nom_station', 'nom_poll']).max().reset_index()
+dataSO2_occitanie = dataSO2_7_occitanie.groupby(['nom_station', 'nom_poll']).max().reset_index()
+dataNO2_occitanie = dataNO2_8_occitanie.groupby(['nom_station', 'nom_poll']).max().reset_index()
+
+# Charger les données des stations des villes dans la région Occitanie
+df_occitanie = pd.DataFrame(dataNO2_occitanie).dropna(subset=['valeur'])
+
+# Charger les données des départements
+geojson_path_occitanie = "https://france-geojson.gregoiredavid.fr/repo/regions/occitanie/departements-occitanie.geojson"
+response_occitanie = requests.get(geojson_path_occitanie)
+geojson_occitanie = response_occitanie.json()
+
+# Créer une échelle de couleurs linéaire pour la carte
+colormap_occitanie = linear.YlOrRd_09.scale(df_occitanie['valeur'].min(), df_occitanie['valeur'].max())
+
+# Créer la carte avec ipyleaflet
+mymap_occitanie = ipyleaflet.Map(center=(43.6, 2.5), zoom=7.5)
+
+def random_color_occitanie(feature):
     return {
-        'fillColor': color,
-        'color': 'black',
-        'weight': 1,
-        'fillOpacity': 0.7
+        'color': 'pink',
+        'fillColor': random.choice(['red', 'yellow', 'green', 'orange']),
     }
 
-# Ajouter le GeoJSON à la carte avec la fonction de style
-folium.GeoJson(
-    geojson_data,
-    style_function=style_function,
-).add_to(m)
+# Ajouter la couche GeoJSON à la carte
+geojson_layer_occitanie =  GeoJSON(
+    data=geojson_occitanie,
+    style={
+        'opacity': 1, 'dashArray': '9', 'fillOpacity': 0.2, 'weight': 1
+    },
+    hover_style={
+        'color': 'white', 'dashArray': '0', 'fillOpacity': 0.5
+    },
+    style_callback=random_color_occitanie
+)
+mymap_occitanie.add_layer(geojson_layer_occitanie)
 
-# Ajouter un marqueur pour chaque station météorologique
-for index, row in df.iterrows():
-    folium.Marker(
-        location=[row['y_wgs84'], row['x_wgs84']],
-        popup=f"{row['nom_station']} - {row['nom_com']}, {row['nom_dept']}"
-    ).add_to(m)
-# Enregistrez la carte au format HTML
-m.save("carte_interactive_occitanie_coloree.html")
+# Ajouter la couche de marqueurs à la carte avec des couleurs basées sur l'intensité du polluant
+markers_layer_occitanie = ipyleaflet.MarkerCluster(
+    markers=[
+        ipyleaflet.CircleMarker(
+            location=(row['y'], row['x']),
+            radius=10,  # Ajustez le rayon selon vos préférences
+            color=colormap_occitanie.rgb_hex_str(row['valeur']),
+            fill_color=colormap_occitanie.rgb_hex_str(row['valeur']),
+            fill_opacity=0.9,
+            popup=ipywidgets.HTML(value=f"<div style='font-family: Arial; padding: 10px;background-color: #dcffb8;'><strong>{row['nom_station']}</strong>"),    
+            draggable=False,
+        )
+        for _, row in df_occitanie.iterrows()
+    ]
+)
+mymap_occitanie.add_layer(markers_layer_occitanie)
 
-```
-
-`
+# Afficher la carte
+mymap_occitanie
