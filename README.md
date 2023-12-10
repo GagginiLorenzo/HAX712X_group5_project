@@ -12,7 +12,16 @@ Découvrez par vous-même la qualité de l'air en Occitanie en visitant notre si
 
 # description de la licence 
 
+ La licence utilisée est MIT (Massachusetts Institute of Technology) qui est une licence open source largement utilisée.elle est mise en fichier dans la branche main.
+ *Permission d'Utilisation : Toute personne qui obtient une copie du logiciel est autorisée à l'utiliser, le copier, le modifier, le fusionner, le publier, le distribuer, le sous-licencier ou le vendre, et ceci gratuitement.
+
+ *Conditions de Licence : L'utilisateur doit inclure l'avis de copyright (copyright notice) indiqué dans le texte de la licence ainsi que l'avis de permission (permission notice) dans toutes les copies ou portions substantielles du logiciel.
+
+ *Absence de Garantie : Le logiciel est fourni "tel quel", sans aucune garantie. Les auteurs ou détenteurs du copyright ne fournissent aucune garantie explicite ou implicite, y compris, mais sans s'y limiter, les garanties de qualité marchande, d'adéquation à un usage particulier et d'absence de contrefaçon.
+
+ *Responsabilité Limitée : En aucun cas, les auteurs ou détenteurs du copyright ne peuvent être tenus responsables de toute réclamation, dommage ou autre responsabilité, que ce soit dans le cadre d'une action contractuelle, délictuelle ou autre, découlant de l'utilisation du logiciel ou en relation avec celui-ci.
  
+
 
  
 
