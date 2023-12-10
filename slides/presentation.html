@@ -408,9 +408,20 @@ ABCHICHE Thiziri BERNARD-REYMOND Guillaume GAGGINI Lorenzo HAMOMI Majda
 <h1>Table des matières</h1>
 <ol type="1">
 <li>Introduction</li>
-<li>Traitement des données</li>
-<li>Visualisation</li>
-<li>Intégration et déploiement</li>
+<li>Traitement des données
+<ul>
+<li>Atmos</li>
+<li>Synop</li>
+</ul></li>
+<li>Visualisation
+<ul>
+<li>Carte intéractive</li>
+</ul></li>
+<li>Intégration et déploiement
+<ul>
+<li>Le flot de donnée</li>
+<li>ShinyLive</li>
+</ul></li>
 <li>Conclusion</li>
 </ol>
 </section>
@@ -419,8 +430,8 @@ ABCHICHE Thiziri BERNARD-REYMOND Guillaume GAGGINI Lorenzo HAMOMI Majda
 <h1>Introduction</h1>
 <p><strong>Objectifs :</strong> un site interactif avec :</p>
 <ul>
-<li>une carte intéractive</li>
-<li>différents types de graphiques</li>
+<li>des graphiques de différents polluants et de données météorologiques pour essayer de voir l’influence de la méteo sur la pollution</li>
+<li>une carte intéractive permettant de sélectionner une ville pour afficher les graphiques</li>
 </ul>
 <aside class="notes">
 <p>un ou plusieurs graphiques simultanément décrivant l’évolution d’une valeur de polluant ou bien donnée du climat. Tout ceci pourra être conditionné en amont par d’autres choix notamment temporels.</p>
@@ -440,94 +451,195 @@ ABCHICHE Thiziri BERNARD-REYMOND Guillaume GAGGINI Lorenzo HAMOMI Majda
 <section>
 <section id="traitement-des-données" class="title-slide slide level1 center">
 <h1>Traitement des données</h1>
-<center>
-<img data-src="./Images/traitement.svg" style="width:70.0%">
-</center>
-</section>
-<section class="slide level2">
-
-<p><strong>Deux jeux de données :</strong></p>
+<p>Deux jeux de données :</p>
 <ul>
-<li><strong>Atmos</strong> : mesures de différents polluants dans la région Occitanie.</li>
-</ul>
-<center>
-<img data-src="./Images/polluants.png" style="width:70.0%">
-</center>
-<ul>
-<li><strong>Synop</strong> : données météorologiques partout en France.</li>
+<li><strong>Atmos</strong> : mesures de différents polluants dans la région occitanie. De nombreux choix de types de relevés</li>
+<li><strong>Synop</strong> : données météorologiques partout en France : sélection obligatoire.</li>
 </ul>
 </section>
 <section id="atmos" class="slide level2">
 <h2>Atmos</h2>
+<p>Différents traitements en fonction du graphique désiré :</p>
 <ul>
-<li>Influence des saisons ?</li>
-<li>Influence des jours de la semaine ?</li>
-<li>Influence des type d’émetteurs ?</li>
+<li>une représentation moyenne journalière sur l’année</li>
+<li>une représentation moyenne sur la semaine</li>
+<li>une représentation selon la typologie de la station de mesure</li>
 </ul>
+</section>
+<section class="slide level2">
+
+<h3 id="représentation-moyenne-journalière">Représentation moyenne journalière</h3>
+<p><strong>Objectif :</strong> Visualiser l’influence de la saisonnalité sur la pollution</p>
+<p><strong>Le résultat :</strong></p>
 <center>
-<img data-src="./Images/questionnement.svg" style="width:40.0%">
+<img data-src="./Images/year.svg">
 </center>
 </section>
 <section class="slide level2">
 
-<h3 id="variation-selon-les-saisons">Variation selon les saisons ?</h3>
-<center>
-<img data-src="./Images/year.png" style="width:75.0%">
-</center>
+<p><strong>Fonction de sélection :</strong></p>
+<div class="sourceCode" id="cb1" data-code-line-numbers="6-8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">def</span> selection(ville, polluant):</span>
+<span id="cb1-2"><a href="#cb1-2"></a>    <span class="cf">if</span> ville <span class="op">==</span> <span class="st">"MONTPELLIER"</span>:</span>
+<span id="cb1-3"><a href="#cb1-3"></a>        df_atmo[<span class="st">"nom_station"</span>] <span class="op">=</span> df_atmo[<span class="st">"nom_station"</span>].replace(</span>
+<span id="cb1-4"><a href="#cb1-4"></a>            [<span class="st">"Montpelier Pere Louis Trafic"</span>], <span class="st">"Montpelier Antigone Trafic"</span></span>
+<span id="cb1-5"><a href="#cb1-5"></a>        )</span>
+<span id="cb1-6"><a href="#cb1-6"></a>    df_1 <span class="op">=</span> df_atmo.loc[</span>
+<span id="cb1-7"><a href="#cb1-7"></a>        (df_atmo[<span class="st">"nom_com"</span>] <span class="op">==</span> ville) <span class="op">&amp;</span> (df_atmo[<span class="st">"nom_polluant"</span>] <span class="op">==</span> polluant), :</span>
+<span id="cb1-8"><a href="#cb1-8"></a>    ]</span>
+<span id="cb1-9"><a href="#cb1-9"></a>    <span class="cf">return</span> df_1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section class="slide level2">
+
 <p><strong>Fonction de tracé :</strong></p>
-<div class="sourceCode" id="cb1" data-code-line-numbers="15-25"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(nb_stations):</span>
-<span id="cb1-2"><a href="#cb1-2"></a>        <span class="co"># on garde seulement les données de la station i</span></span>
-<span id="cb1-3"><a href="#cb1-3"></a>        df_pvs <span class="op">=</span> df_pv.loc[df_pv[<span class="st">"nom_station"</span>] <span class="op">==</span> nom_stations[i]]</span>
-<span id="cb1-4"><a href="#cb1-4"></a>        <span class="co"># transformation en datetime de date_debut</span></span>
-<span id="cb1-5"><a href="#cb1-5"></a>        df_pvs[<span class="st">"date_debut"</span>] <span class="op">=</span> df_pvs[<span class="st">"date_debut"</span>].<span class="bu">apply</span>(</span>
-<span id="cb1-6"><a href="#cb1-6"></a>            <span class="kw">lambda</span> _: datetime.strptime(_, <span class="st">"%Y-%m-</span><span class="sc">%d</span><span class="st"> %H:%M:%S"</span>)</span>
-<span id="cb1-7"><a href="#cb1-7"></a>        )</span>
-<span id="cb1-8"><a href="#cb1-8"></a>        <span class="co"># datetime devient index</span></span>
-<span id="cb1-9"><a href="#cb1-9"></a>        df_pvs <span class="op">=</span> df_pvs.set_index([<span class="st">"date_debut"</span>])</span>
-<span id="cb1-10"><a href="#cb1-10"></a>        <span class="co"># on moyennise par jour</span></span>
-<span id="cb1-11"><a href="#cb1-11"></a>        axes[i].plot(df_pvs[<span class="st">"valeur"</span>].resample(<span class="st">"d"</span>).mean())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb2" data-code-line-numbers="15-25"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">def</span> graphique(ville, polluant):</span>
+<span id="cb2-2"><a href="#cb2-2"></a>    df_pv <span class="op">=</span> selection(ville, polluant)</span>
+<span id="cb2-3"><a href="#cb2-3"></a>    <span class="co"># les différentes stations</span></span>
+<span id="cb2-4"><a href="#cb2-4"></a>    nom_stations <span class="op">=</span> df_pv[<span class="st">"nom_station"</span>].unique()</span>
+<span id="cb2-5"><a href="#cb2-5"></a>    nb_stations <span class="op">=</span> <span class="bu">len</span>(nom_stations)</span>
+<span id="cb2-6"><a href="#cb2-6"></a>    <span class="co"># plusieurs graphiques</span></span>
+<span id="cb2-7"><a href="#cb2-7"></a>    <span class="cf">if</span> nb_stations <span class="op">==</span> <span class="dv">1</span>:</span>
+<span id="cb2-8"><a href="#cb2-8"></a>        fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">5</span>), layout<span class="op">=</span><span class="st">"constrained"</span>)  <span class="co"># Créer une seule sous-figure</span></span>
+<span id="cb2-9"><a href="#cb2-9"></a>        axes <span class="op">=</span> [axes]  <span class="co"># Mettre l'unique axe dans une liste</span></span>
+<span id="cb2-10"><a href="#cb2-10"></a>    <span class="cf">else</span>:</span>
+<span id="cb2-11"><a href="#cb2-11"></a>        fig, axes <span class="op">=</span> plt.subplots(nb_stations, <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">15</span>), sharex<span class="op">=</span><span class="va">True</span>, layout<span class="op">=</span><span class="st">"constrained"</span>)</span>
+<span id="cb2-12"><a href="#cb2-12"></a>    <span class="co"># titre général</span></span>
+<span id="cb2-13"><a href="#cb2-13"></a>    fig.suptitle(<span class="st">"Pollution au "</span> <span class="op">+</span> <span class="bu">str</span>(polluant) <span class="op">+</span> <span class="st">" à "</span> <span class="op">+</span> <span class="bu">str</span>(ville), fontsize<span class="op">=</span><span class="dv">16</span>)</span>
+<span id="cb2-14"><a href="#cb2-14"></a></span>
+<span id="cb2-15"><a href="#cb2-15"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(nb_stations):</span>
+<span id="cb2-16"><a href="#cb2-16"></a>        <span class="co"># on garde seulement les données de la station i</span></span>
+<span id="cb2-17"><a href="#cb2-17"></a>        df_pvs <span class="op">=</span> df_pv.loc[df_pv[<span class="st">"nom_station"</span>] <span class="op">==</span> nom_stations[i]]</span>
+<span id="cb2-18"><a href="#cb2-18"></a>        <span class="co"># transformation en datetime de date_debut</span></span>
+<span id="cb2-19"><a href="#cb2-19"></a>        df_pvs[<span class="st">"date_debut"</span>] <span class="op">=</span> df_pvs[<span class="st">"date_debut"</span>].<span class="bu">apply</span>(</span>
+<span id="cb2-20"><a href="#cb2-20"></a>            <span class="kw">lambda</span> _: datetime.strptime(_, <span class="st">"%Y-%m-</span><span class="sc">%d</span><span class="st"> %H:%M:%S"</span>)</span>
+<span id="cb2-21"><a href="#cb2-21"></a>        )</span>
+<span id="cb2-22"><a href="#cb2-22"></a>        <span class="co"># datetime devient index</span></span>
+<span id="cb2-23"><a href="#cb2-23"></a>        df_pvs <span class="op">=</span> df_pvs.set_index([<span class="st">"date_debut"</span>])</span>
+<span id="cb2-24"><a href="#cb2-24"></a>        <span class="co"># on moyennise par jour</span></span>
+<span id="cb2-25"><a href="#cb2-25"></a>        axes[i].plot(df_pvs[<span class="st">"valeur"</span>].resample(<span class="st">"d"</span>).mean())</span>
+<span id="cb2-26"><a href="#cb2-26"></a>        <span class="co"># labellisations et titre</span></span>
+<span id="cb2-27"><a href="#cb2-27"></a>        <span class="cf">for</span> label <span class="kw">in</span> axes[i].get_xticklabels():</span>
+<span id="cb2-28"><a href="#cb2-28"></a>            label.set_ha(<span class="st">"right"</span>)</span>
+<span id="cb2-29"><a href="#cb2-29"></a>            label.set_rotation(<span class="dv">45</span>)</span>
+<span id="cb2-30"><a href="#cb2-30"></a>        axes[i].set_ylabel(<span class="st">"Concentration en µg/m3"</span>)</span>
+<span id="cb2-31"><a href="#cb2-31"></a>        axes[i].set_title(</span>
+<span id="cb2-32"><a href="#cb2-32"></a>            <span class="st">"Concentration du "</span> <span class="op">+</span> <span class="bu">str</span>(polluant) <span class="op">+</span> <span class="st">" à "</span> <span class="op">+</span> <span class="bu">str</span>(nom_stations[i])</span>
+<span id="cb2-33"><a href="#cb2-33"></a>        )</span>
+<span id="cb2-34"><a href="#cb2-34"></a>        axes[i].grid(<span class="va">True</span>)</span>
+<span id="cb2-35"><a href="#cb2-35"></a>    plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section class="slide level2">
 
-<h3 id="effet-week-end">Effet week-end ?</h3>
+<h3 id="représentation-moyenne-sur-la-semaine">Représentation moyenne sur la semaine</h3>
+<p><strong>Objectif :</strong> Visualiser l’influence du jour de la semaine sur la pollution d’une ville pour un polluant donné.</p>
+<p><strong>Résultat :</strong></p>
 <center>
-<img data-src="./Images/week.png" style="height:75.0%">
+<img data-src="./Images/week.svg">
 </center>
-<p><strong>Fonction de tracé :</strong></p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1"></a><span class="co"># colonne avec le numéro des jours</span></span>
-<span id="cb2-2"><a href="#cb2-2"></a>        df_pvs[<span class="st">"weekday"</span>] <span class="op">=</span> df_pvs.index.weekday</span>
-<span id="cb2-3"><a href="#cb2-3"></a>        <span class="co"># on regroupe par jour et on fait la moyenne</span></span>
-<span id="cb2-4"><a href="#cb2-4"></a>        pollution_week <span class="op">=</span> (</span>
-<span id="cb2-5"><a href="#cb2-5"></a>            df_pvs.groupby([<span class="st">"weekday"</span>, df_pvs.index.hour])[<span class="st">"valeur"</span>]</span>
-<span id="cb2-6"><a href="#cb2-6"></a>            .mean()</span>
-<span id="cb2-7"><a href="#cb2-7"></a>            .unstack(level<span class="op">=</span><span class="dv">0</span>)</span>
-<span id="cb2-8"><a href="#cb2-8"></a>        )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section class="slide level2">
 
-<h3 id="influence-des-différents-émetteurs">Influence des différents émetteurs ?</h3>
+<p><strong>Fonction de tracé :</strong></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1"></a><span class="co"># colonne avec le numéro des jours</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a>        df_pvs[<span class="st">"weekday"</span>] <span class="op">=</span> df_pvs.index.weekday</span>
+<span id="cb3-3"><a href="#cb3-3"></a>        <span class="co"># on regroupe par jour et on fait la moyenne</span></span>
+<span id="cb3-4"><a href="#cb3-4"></a>        pollution_week <span class="op">=</span> (</span>
+<span id="cb3-5"><a href="#cb3-5"></a>            df_pvs.groupby([<span class="st">"weekday"</span>, df_pvs.index.hour])[<span class="st">"valeur"</span>]</span>
+<span id="cb3-6"><a href="#cb3-6"></a>            .mean()</span>
+<span id="cb3-7"><a href="#cb3-7"></a>            .unstack(level<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb3-8"><a href="#cb3-8"></a>        )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section class="slide level2">
+
+<h3 id="représentation-selon-la-typologie-de-la-station-de-mesure">Représentation selon la typologie de la station de mesure</h3>
+<p><strong>Objectif :</strong> Visualiser dans quel type d’environnement la pollution par une substance était la plus importante</p>
+<p><strong>Résultat :</strong></p>
 <center>
 <img data-src="./Images/influ.svg">
 </center>
-<div class="sourceCode" id="cb3" data-code-line-numbers="1-3,12-16"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1"></a>pol_influ <span class="op">=</span> df_atmo.groupby([<span class="st">'influence'</span>, <span class="st">'nom_polluant'</span>])[</span>
-<span id="cb3-2"><a href="#cb3-2"></a>    <span class="st">'valeur'</span>].mean().<span class="bu">round</span>(<span class="dv">1</span>).unstack(level<span class="op">=</span><span class="dv">0</span>)</span>
-<span id="cb3-3"><a href="#cb3-3"></a>polluants <span class="op">=</span> pol_influ.index.tolist()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section></section>
-<section id="visualisation" class="title-slide slide level1 center">
-<h1>Visualisation</h1>
+</section>
+<section class="slide level2">
+
+<p><strong>Fonction de tracé</strong></p>
+<div class="sourceCode" id="cb4" data-code-line-numbers="1-3,12-16"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1"></a>pol_influ <span class="op">=</span> df_atmo.groupby([<span class="st">'influence'</span>, <span class="st">'nom_polluant'</span>])[</span>
+<span id="cb4-2"><a href="#cb4-2"></a>    <span class="st">'valeur'</span>].mean().<span class="bu">round</span>(<span class="dv">1</span>).unstack(level<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb4-3"><a href="#cb4-3"></a>polluants <span class="op">=</span> pol_influ.index.tolist()</span>
+<span id="cb4-4"><a href="#cb4-4"></a></span>
+<span id="cb4-5"><a href="#cb4-5"></a><span class="co"># position des labels et tracé du graphique</span></span>
+<span id="cb4-6"><a href="#cb4-6"></a>x <span class="op">=</span> np.arange(<span class="bu">len</span>(polluants)) <span class="op">+</span> <span class="dv">1</span>  <span class="co"># the label locations</span></span>
+<span id="cb4-7"><a href="#cb4-7"></a>width <span class="op">=</span> <span class="fl">0.25</span>  <span class="co"># the width of the bars</span></span>
+<span id="cb4-8"><a href="#cb4-8"></a>multiplier <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb4-9"><a href="#cb4-9"></a></span>
+<span id="cb4-10"><a href="#cb4-10"></a>fig, ax <span class="op">=</span> plt.subplots(layout<span class="op">=</span><span class="st">'constrained'</span>)</span>
+<span id="cb4-11"><a href="#cb4-11"></a></span>
+<span id="cb4-12"><a href="#cb4-12"></a><span class="cf">for</span> attribute, measurement <span class="kw">in</span> pol_influ.items():</span>
+<span id="cb4-13"><a href="#cb4-13"></a>    offset <span class="op">=</span> width <span class="op">*</span> multiplier</span>
+<span id="cb4-14"><a href="#cb4-14"></a>    rects <span class="op">=</span> ax.bar(x <span class="op">+</span> offset, measurement, width, label<span class="op">=</span>attribute)</span>
+<span id="cb4-15"><a href="#cb4-15"></a>    ax.bar_label(rects, padding<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb4-16"><a href="#cb4-16"></a>    multiplier <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb4-17"><a href="#cb4-17"></a></span>
+<span id="cb4-18"><a href="#cb4-18"></a>ax.set_ylabel(<span class="st">'Concentration en µg/m³'</span>,fontsize <span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb4-19"><a href="#cb4-19"></a>ax.set_title(<span class="st">'Influence du type de mesure'</span>)</span>
+<span id="cb4-20"><a href="#cb4-20"></a>ax.set_xticks(x <span class="op">+</span> width, polluants,fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb4-21"><a href="#cb4-21"></a>ax.legend(loc<span class="op">=</span><span class="st">'upper left'</span>, ncols<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb4-22"><a href="#cb4-22"></a>ax.set_ylim(<span class="dv">0</span>, <span class="dv">90</span>)</span>
+<span id="cb4-23"><a href="#cb4-23"></a></span>
+<span id="cb4-24"><a href="#cb4-24"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section class="slide level2">
 
 </section>
+<section class="slide level2">
 
+</section></section>
 <section>
 <section id="intégration-et-déploiement" class="title-slide slide level1 center">
 <h1>Intégration et déploiement</h1>
 
 </section>
-<section id="appel-api" class="slide level2">
-<h2>Appel API</h2>
-<center>
-<img data-src="./Images/api.svg" style="width:75.0%">
-</center>
+<section id="le-flot-de-donnée" class="slide level2">
+<h2>Le flot de donnée</h2>
+<ul>
+<li>La proposition : Communiqué avec des bases de donné et executer du codes python depuis une page web statiques déployer sur github</li>
+</ul>
+</section>
+<section id="le-flot-de-donnée-1" class="slide level2">
+<h2>Le flot de donnée</h2>
+<ul>
+<li><p>La proposition : Communiqué avec des bases de donné et executer du codes python depuis une page web statiques déployer sur github</p></li>
+<li><p>Objectif : Etablir un flot de donnée entre les bases de donnée et une Ghitube page</p></li>
+</ul>
+</section>
+<section id="le-flot-de-donnée-2" class="slide level2">
+<h2>Le flot de donnée</h2>
+<ul>
+<li><p>La proposition : Communiqué avec des bases de donné et executer du codes python depuis une page web statiques déployer sur github</p></li>
+<li><p>Objectif : Etablir un flot de donnée entre les bases de donnée et une Ghitube page</p></li>
+<li><p>Enjeux : page web hébergé sur un serveur statiques, contraintes techniques</p></li>
+</ul>
+</section>
+<section id="shinylive" class="slide level2">
+<h2>ShinyLive</h2>
+<ul>
+<li>Solution qui respecte les contraintes du projet : Documenter et supporter comme extension de quarto</li>
+</ul>
+</section>
+<section id="shinylive-1" class="slide level2">
+<h2>ShinyLive</h2>
+<ul>
+<li><p>Solution qui respecte les contraintes du projet : Documenter et supporter comme extension de quarto</p></li>
+<li><p>Satisfait aux ambitions dynamiques du projet</p></li>
+</ul>
+</section>
+<section id="shinylive-2" class="slide level2">
+<h2>ShinyLive</h2>
+<ul>
+<li><p>Solution qui respecte les contraintes du projet : Documenter et supporter comme extension de quarto</p></li>
+<li><p>Satisfait aux ambitions dynamiques du projet</p></li>
+<li><p>Permet une interractivité totale entre les modules</p></li>
+</ul>
+</section>
+<section id="section" class="slide level2">
+<h2></h2>
 <div class="footer footer-default">
 
 </div>
