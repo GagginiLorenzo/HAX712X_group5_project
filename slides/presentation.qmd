@@ -14,17 +14,21 @@ format:
 # Table des matières
    1) Introduction
    2) Traitement des données
+       * Atmos
+       * Synop 
    3) Visualisation
+       * Carte intéractive
    4) Intégration et déploiement
+       * Le flot de donnée
+       * ShinyLive
    5) Conclusion 
 
 # Introduction
 
 **Objectifs :** un site interactif avec :
 
-   * une carte intéractive 
-   * différents types de graphiques 
-   
+   * des graphiques de différents polluants et de données météorologiques pour essayer de voir l'influence de la méteo sur la pollution
+   * une carte intéractive permettant de sélectionner une ville pour afficher les graphiques
 
 ::: {.notes}
  un ou plusieurs graphiques simultanément décrivant l'évolution d'une valeur de polluant  ou bien donnée du climat. Tout ceci pourra être conditionné en amont par d'autres choix notamment temporels. 
@@ -32,45 +36,65 @@ format:
 
 # Traitement des données
 
-<center>
-![](./Images/traitement.svg){width=70%}
-</center>
+Deux jeux de données :
 
----
-
-**Deux jeux de données :**
-
-   * **Atmos** : mesures de différents polluants dans la région Occitanie. 
-
-<center>
-![](./Images/polluants.png){width=70%}
-</center>
-
-   * **Synop** : données météorologiques partout en France.
-
-
+   * **Atmos** : mesures de différents polluants dans la région occitanie. De nombreux choix de types de relevés
+   * **Synop** : données météorologiques partout en France : sélection obligatoire.
 
 ## Atmos
 
-   * Influence des saisons ?
-   * Influence des jours de la semaine ?
-   * Influence des type d'émetteurs ?
+Différents traitements en fonction du graphique désiré :
 
-<center>
-![](./Images/questionnement.svg){width=40%}
-</center>
+   * une représentation moyenne journalière sur l'année 
+   * une représentation moyenne sur la semaine
+   * une représentation selon la typologie de la station de mesure
 
 ---
 
-### Variation selon les saisons ?
+### Représentation moyenne journalière
+
+**Objectif :** Visualiser l'influence de la saisonnalité sur la pollution
+
+**Le résultat :**
 
 <center>
-![](./Images/year.png){width=75%}
+![](./Images/year.svg)
 </center>
+
+ --- 
+
+**Fonction de sélection :**
+
+```{.python code-line-numbers="6-8"}
+def selection(ville, polluant):
+    if ville == "MONTPELLIER":
+        df_atmo["nom_station"] = df_atmo["nom_station"].replace(
+            ["Montpelier Pere Louis Trafic"], "Montpelier Antigone Trafic"
+        )
+    df_1 = df_atmo.loc[
+        (df_atmo["nom_com"] == ville) & (df_atmo["nom_polluant"] == polluant), :
+    ]
+    return df_1
+```
+---
 
 **Fonction de tracé :**
 
 ```{.python code-line-numbers="15-25"}
+def graphique(ville, polluant):
+    df_pv = selection(ville, polluant)
+    # les différentes stations
+    nom_stations = df_pv["nom_station"].unique()
+    nb_stations = len(nom_stations)
+    # plusieurs graphiques
+    if nb_stations == 1:
+        fig, axes = plt.subplots(1, 1, figsize=(10, 5), layout="constrained")  # Créer une seule sous-figure
+        axes = [axes]  # Mettre l'unique axe dans une liste
+    else:
+        fig, axes = plt.subplots(nb_stations, 1, figsize=(10, 15), sharex=True, layout="constrained")
+    # titre général
+    fig.suptitle("Pollution au " + str(polluant) + " à " + str(ville), fontsize=16)
+
     for i in range(nb_stations):
         # on garde seulement les données de la station i
         df_pvs = df_pv.loc[df_pv["nom_station"] == nom_stations[i]]
@@ -82,14 +106,30 @@ format:
         df_pvs = df_pvs.set_index(["date_debut"])
         # on moyennise par jour
         axes[i].plot(df_pvs["valeur"].resample("d").mean())
+        # labellisations et titre
+        for label in axes[i].get_xticklabels():
+            label.set_ha("right")
+            label.set_rotation(45)
+        axes[i].set_ylabel("Concentration en µg/m3")
+        axes[i].set_title(
+            "Concentration du " + str(polluant) + " à " + str(nom_stations[i])
+        )
+        axes[i].grid(True)
+    plt.show()
 ```
 ---
 
-### Effet week-end ?
+### Représentation moyenne sur la semaine
+
+**Objectif :** Visualiser l'influence du jour de la semaine sur la pollution d'une ville pour un polluant donné.
+
+**Résultat :**
 
 <center>
-![](./Images/week.png){height=75%}
+![](./Images/week.svg)
 </center>
+
+---
 
 **Fonction de tracé :**
 
@@ -105,18 +145,49 @@ format:
 ```
 ---
 
-### Influence des différents émetteurs ?
+### Représentation selon la typologie de la station de mesure
+
+**Objectif :** Visualiser dans quel type d'environnement la pollution par une substance était la plus importante
+
+**Résultat :**
 
 <center>
 ![](./Images/influ.svg)
 </center>
 
 
+
+---
+**Fonction de tracé**
+
 ```{.python code-line-numbers="1-3,12-16"}
 pol_influ = df_atmo.groupby(['influence', 'nom_polluant'])[
     'valeur'].mean().round(1).unstack(level=0)
 polluants = pol_influ.index.tolist()
+
+# position des labels et tracé du graphique
+x = np.arange(len(polluants)) + 1  # the label locations
+width = 0.25  # the width of the bars
+multiplier = 0
+
+fig, ax = plt.subplots(layout='constrained')
+
+for attribute, measurement in pol_influ.items():
+    offset = width * multiplier
+    rects = ax.bar(x + offset, measurement, width, label=attribute)
+    ax.bar_label(rects, padding=3)
+    multiplier += 1
+
+ax.set_ylabel('Concentration en µg/m³',fontsize =20)
+ax.set_title('Influence du type de mesure')
+ax.set_xticks(x + width, polluants,fontsize=12)
+ax.legend(loc='upper left', ncols=3)
+ax.set_ylim(0, 90)
+
+plt.show()
+
 ```
+<<<<<<< HEAD
 # Visualisation
 
 <center>
@@ -147,11 +218,61 @@ polluants = pol_influ.index.tolist()
   <img src="./Images/im2O3.PNG" alt="Description de l'image" style="width: 80%; height: auto;">
 </center>
 
+=======
+---
+
+---
+>>>>>>> 15e62d3fb2e9b69117dc957d065aa6f1851bb151
 
 # Intégration et déploiement
 
-## Appel API
+## Le flot de donnée
 
-<center>
-![](./Images/api.svg){width=75%}
-</center>
+   * La proposition : Communiqué avec des bases de donné et executer du codes python depuis une page web statiques déployer sur github
+
+## Le flot de donnée
+   * La proposition : Communiqué avec des bases de donné et executer du codes python depuis une page web statiques déployer sur github
+
+   * Objectif : Etablir un flot de donnée entre les bases de donnée et une Ghitube page
+
+## Le flot de donnée
+
+   * La proposition : Communiqué avec des bases de donné et executer du codes python depuis une page web statiques déployer sur github
+
+   * Objectif : Etablir un flot de donnée entre les bases de donnée et une Ghitube page
+
+   * Enjeux : page web hébergé sur un serveur statiques, contraintes techniques
+
+
+## ShinyLive
+
+   * Solution qui respecte les contraintes du projet : Documenter et supporter comme extension de quarto
+
+## ShinyLive
+
+   * Solution qui respecte les contraintes du projet : Documenter et supporter comme extension de quarto
+
+   * Satisfait aux ambitions dynamiques du projet
+
+## ShinyLive
+
+   * Solution qui respecte les contraintes du projet : Documenter et supporter comme extension de quarto
+
+   * Satisfait aux ambitions dynamiques du projet
+
+   * Permet une interractivité totale entre les modules
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+## 
