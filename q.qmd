@@ -29,7 +29,7 @@ from shiny import App, Inputs, Outputs, Session, reactive, ui
 polluant_atmos="'O3'","'NO2'","'NO'","'NOX'","'H2S'","'PM10'","'PM2.5'","'SO2'"
 
 app_ui = ui.page_fluid(   
-    ui.input_selectize("condition1", "polluant_atmos", polluant_atmos,multiple = True),
+    ui.input_selectize("condition1", "Polluant", polluant_atmos,multiple = True),
     ui.output_text_verbatim("info1"),
     ui.output_text_verbatim("Clicks"),
     output_widget("map",height='500px'),
@@ -71,6 +71,9 @@ def server(input, output, session):
 
     @reactive.Calc
     async def polluant_data():
+        '''
+        FOnction qui place les différentes stations cliquable sur la carte
+        '''
         r= await data1()
         records = r.get('features', [])
         records_data = [record['attributes'] for record in records]
@@ -524,7 +527,7 @@ app = App(app_ui, server, debug=True)
 ::: {.column-screen-inset}
 
 ::: {.column width="49%"}
-### Représentation de l'influence de la mesure
+### Représentation de l'influence des émetteurrs
 ```{shinylive-python}
 #| standalone: true
 #| viewerHeight: 800
