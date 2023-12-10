@@ -35,3 +35,34 @@ else:
 records = data.get('features', [])
 records_data = [record['attributes'] for record in records]
 df_atmo = pd.DataFrame(records_data)
+
+# liste des villes et des polluants
+villes = df_atmo["nom_station"].unique().tolist()
+villes.sort()
+polluants = df_atmo["nom_poll"].unique().tolist()
+polluants.sort()
+df_atmo["nom_station"]=df_atmo["nom_station"].str.title()
+d= dict(tuple(df_atmo.groupby('nom_poll')))
+dataO3_1 = d['O3']
+dataPM10_2 = d['PM10']
+dataNOX_3 = d['NOX']
+dataPM25_4 = d['PM2.5']
+dataNO_5 = d['NO']
+dataH2S_6 = d['H2S']
+dataSO2_7 = d['SO2']
+dataNO2_8= d['NO2']
+
+# Créer un nouveau DataFrame avec les résultats
+dataO3 = dataO3_1.groupby(['nom_station', 'nom_poll']).max().reset_index()
+dataPM10 =dataPM10_2.groupby(['nom_station', 'nom_poll']).max().reset_index()
+dataNOX = dataNOX_3.groupby(['nom_station', 'nom_poll']).max().reset_index()
+dataPM25 = dataPM25_4.groupby(['nom_station', 'nom_poll']).max().reset_index()
+dataNO = dataNO_5.groupby(['nom_station', 'nom_poll']).max().reset_index()
+dataH2S = dataH2S_6.groupby(['nom_station', 'nom_poll']).max().reset_index()
+dataSO2 = dataSO2_7.groupby(['nom_station', 'nom_poll']).max().reset_index()
+dataNO2 = dataNO2_8.groupby(['nom_station', 'nom_poll']).max().reset_index()
+
+
+# Charger les données des stations des villes dans la région Occitanie
+
+df = pd.DataFrame(dataO3)
