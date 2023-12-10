@@ -27,8 +27,6 @@ def selection(ville, polluant):
     return df_1
 
 
-
-
 # %%
 # Fonction qui trace le graphique
 def graphique(ville, polluant):
