@@ -1,6 +1,4 @@
-<<<<<<< HEAD
+
 
 <iframe src="occitanie.html" width="100%" height="5000px"></iframe>
-=======
-<iframe src="carte_interactive_occitanie_coloree.html" width="100%" height="5000px"></iframe>
->>>>>>> b091fbf68a4cc7c624add3d62f18080aabd9d1ff
+
