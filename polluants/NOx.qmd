@@ -1,0 +1,31 @@
+---
+title: "NOx : oxydes d'azotes"
+---
+
+Les oxydes d'azote (NOx) regroupent essentiellement deux molécules :
+
+   * le monoxyde d'azote (NO) ;
+   * le dioxyde d'azote (NO2). 
+
+Il existe trois mécanismes de formation des oxydes d'azote, et donc trois types de NOx :
+
+   * les NOx thermiques, formés par combinaison chimique de l’oxygène et de l’azote de l’air lors d’une combustion à très haute température ;
+   * les NOx combustibles, issus de l’oxydation de l’azote présent dans les combustibles ;
+   * les NOx précoces, formés par combinaison chimique de l’azote de l’air avec des radicaux hydrocarbonés (CH et CH2, par exemple), qui se recombinent avec l’oxygène de l’air.
+
+**Les sources d’émission des NOx**
+
+Les oxydes d'azote proviennent essentiellement de procédés fonctionnant à haute température. Dans l’industrie, il s’agit des installations de combustion pour tout type de combustible (combustibles liquides fossiles, charbon, gaz naturel, biomasses, gaz de procédés...) et de procédés industriels (fabrication de verre, métaux, ciment...).
+
+Les principales sources d'émission de NOx sont :
+
+   * le transport routier ;
+   * les secteurs de l'industrie et de la production d'énergie.
+
+**Les impacts des NOx sur la santé**
+
+Le NO2 est un gaz irritant, qui pénètre dans les ramifications les plus fines des voies respiratoires. Il peut provoquer des difficultés respiratoires ou une hyperréactivité bronchique chez les personnes sensibles et favoriser l'accroissement de la sensibilité des bronches aux infections chez l'enfant. Le NO2 est 40 fois plus toxique que le monoxyde de carbone (CO) et quatre fois plus toxique que le NO.
+
+**Les impacts des NOx sur l’environnement**
+
+Associés aux composés organiques volatils (COV), et sous l'effet du rayonnement solaire, les oxydes d'azote favorisent la formation d'ozone dans les basses couches de l'atmosphère (troposphère). En France, des dépassements des normes sanitaires dans l’air ambiant persistent, mais sont moins nombreux que par le passé. Les NOx contribuent aussi à la formation des retombées acides et à l'eutrophisation des écosystèmes. Les oxydes d'azote jouent enfin un rôle dans la formation de particules fines dans l’air ambiant.
