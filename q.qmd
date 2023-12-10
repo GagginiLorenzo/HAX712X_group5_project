@@ -93,6 +93,12 @@ def server(input, output, session):
     @output
     @render_widget
     async def map():
+        '''
+        fonction qui 
+            - trace la carte d'Occitanie 
+            - nous centre dessus
+            - mets des couleurs aux départements en fonction de la valeur du polluant choisi.
+        '''
         g=await data2()
         geojson=g
         d= await polluant_data()
@@ -131,11 +137,19 @@ def server(input, output, session):
     @output
     @render.text
     async def info1():
-        return f"Choisir un polluant pour observer les départements d'Occitanie en dégradé de couleurs, ordonnés par maximum du pic de pollution. Cliquer sur un marqueur pour observer une ville en particulier."
+        return f"Choisir un polluant pour observer les départements d'Occitanie en dégradé de couleurs, ordonnés par maximum du pic de pollution.\n Cliquer sur un marqueur pour observer une ville en particulier."
     
     @output
     @render.plot
     async def GRAPH_YEAR():
+
+        '''
+        fonction qui 
+            - récupère le résultat de l'appel le dictionnaire issu de data()
+            - transforme en dataframe
+            - trace le graphique temporel du polluant choisi dans la ville choisi par le click
+        '''
+        
         #supprimer les warnings
         pd.options.mode.chained_assignment = None  # default='warn'
 
@@ -197,6 +211,7 @@ app = App(app_ui, server)
 ```
 :::
 
+
 ::: {.column-screen-inset}
 
 ::: {.column width="49%"}
@@ -214,10 +229,14 @@ import numpy as np
 from datetime import datetime
 import matplotlib.pyplot as plt
 
-zone_atmos="'AGDE'","'ALES'","'ARGELES-GAZOST'","'AUCH'","'BELESTA-EN-LAURAGAIS'","'BESSIERES'","'BEZIERS'","'BLAGNAC'","'CORNEILHAN'","'GAUDONVILLE'","'LA CALMETTE'","'LATTES'","'LOURDES'","'LUNEL-VIEL'","'MIRAMONT-DE-COMMINGES'","'MONTGISCARD'","'MONTPELLIER'","'NIMES'","'PEYRUSSE-VIEILLE'","'SAINT-GAUDENS'","'SAINT-GIRONS'","'SAZE'","'TARBES'","'TOULOUSE'"     
 
+#les différentes villes
+zone_atmos="'AGDE'","'ALES'","'ARGELES-GAZOST'","'AUCH'","'BELESTA-EN-LAURAGAIS'","'BESSIERES'","'BEZIERS'","'BLAGNAC'","'CORNEILHAN'","'GAUDONVILLE'","'LA CALMETTE'","'LATTES'","'LOURDES'","'LUNEL-VIEL'","'MIRAMONT-DE-COMMINGES'","'MONTGISCARD'","'MONTPELLIER'","'NIMES'","'PEYRUSSE-VIEILLE'","'SAINT-GAUDENS'","'SAINT-GIRONS'","'SAZE'","'TARBES'","'TOULOUSE'"
+
+#les polluants
 polluant_atmos="'O3'","'NO2'","'NO'","'NOX'","'H2S","'PM10'","'PM2.5'","'SO2'"
 
+#choix des villes et des polluants
 app_ui = ui.page_fluid(
         ui.div(
                 ui.input_selectize("selection1", "Ville", zone_atmos,multiple = True),
@@ -245,6 +264,13 @@ def server(input, output, session):
     @output
     @render.plot
     async def GRAPH_YEAR():
+        '''
+        fonction qui 
+            - récupère le résultat de l'appel le dictionnaire issu de data()
+            - transforme en dataframe
+            - trace le graphique temporel
+        '''
+
         #supprimer les warnings
         pd.options.mode.chained_assignment = None  # default='warn'
 
@@ -266,7 +292,10 @@ def server(input, output, session):
         polluants = df_atmo["nom_poll"].unique().tolist()
 
         # Fonction qui trace le graphique
-        def graphique(villes, polluants):
+        def graph_year():
+            '''
+            fonction qui trace le graphique temporel
+            '''
             #on enlève une station double
             if villes == "MONTPELLIER":
                 df_atmo["nom_station"] = df_atmo["nom_station"].replace(["Montpelier Pere Louis Trafic"], "Montpelier Antigone Trafic")
@@ -300,9 +329,7 @@ def server(input, output, session):
                     "Concentration du " + str(polluants[0]) + " à " + str(nom_stations[i]),fontsize = 12)
                 axes[i].grid(True)
             return fig
-            tps2 = time.time()
-            return tps2-tps1
-        return graphique(villes, polluants)
+        return graph_year()
     #@output
     #@render.text
     #async def info1():
@@ -334,10 +361,20 @@ import pandas as pd
 from datetime import datetime
 import matplotlib.pyplot as plt
 
+
+#villes pour synop
 villes = "'GOURDON'","'MILLAU'","'MONTPELLIER'","'PERPIGNAN'","'ST GIRONS'","'TARBES-OSSUN'", "'TOULOUSE-BLAGNAC'" 
-choices_synop= "pres", "tc", "tminsolc", #"nom_dept","date", "nom", 
+
+#choix des paramètres météorologiques
+choices_synop= "pres", "tc", "tminsolc", #"nom_dept","date", "nom",
+
+#choix des années
 y_synop="2022","2023"
+
+#les mois de l'année
 m_synop="01","02","03","04","05","06","07","06","08","09","10","11","12"
+
+#la sélection
 app_ui = ui.page_fluid(
         ui.div(
             ui.input_selectize("ville", "Ville", villes, multiple = True),
@@ -348,7 +385,6 @@ app_ui = ui.page_fluid(
         ),
     ui.output_plot("GRAPH_SYNOP",height='800px')
 )
-
 
 def server(input, output, session):
     #@output
@@ -397,6 +433,12 @@ def server(input, output, session):
     @output
     @render.plot
     async def GRAPH_SYNOP():
+        '''
+        fonction qui 
+            - récupère le résultat de l'appel le dictionnaire issu de data()
+            - transforme en dataframe
+            - trace le graphique temporel du paramètre choisi dans la ville choisie en fonction du temps
+        '''
     
         #supprimer les warnings
         pd.options.mode.chained_assignment = None  # default='warn'
@@ -456,8 +498,12 @@ import numpy as np
 from datetime import datetime
 import matplotlib.pyplot as plt
 
+
+#les villes
 zone_atmos="'AGDE'","'ALES'","'ARGELES-GAZOST'","'AUCH'","'BELESTA-EN-LAURAGAIS'","'BESSIERES'","'BEZIERS'","'BLAGNAC'","'CORNEILHAN'","'GAUDONVILLE'","'LA CALMETTE'","'LATTES'","'LOURDES'","'LUNEL-VIEL'","'MIRAMONT-DE-COMMINGES'","'MONTGISCARD'","'MONTPELLIER'","'NIMES'","'PEYRUSSE-VIEILLE'","'SAINT-GAUDENS'","'SAINT-GIRONS'","'SAZE'","'TARBES'","'TOULOUSE'"     
 
+
+# La sélection
 app_ui = ui.page_fluid(
                 ui.input_selectize("selection1", "Ville", zone_atmos,multiple = True),
                 ui.output_plot("GRAPH_INFLU",height='800px'), #
@@ -470,6 +516,10 @@ def server(input, output, session):
 
     @reactive.Calc
     async def data():
+        '''
+        fonction qui 
+            - récupère le résultat de l'appel API de url2() 
+        '''
         response2 = await pyodide.http.pyfetch(url2())
         dat2 = await response2.json()
         r = dat2,dat2
@@ -478,6 +528,13 @@ def server(input, output, session):
     @output
     @render.plot
     async def GRAPH_INFLU():
+
+        '''
+        fonction qui 
+            - récupère le résultat de l'appel le dictionnaire issu de data()
+            - transforme en dataframe
+            - trace le graphique de la valeur moyennne des polluants en fonction de la ville et du type d'émetteur 
+        '''
     
         #supprimer les warnings
         pd.options.mode.chained_assignment = None  # default='warn'
@@ -492,7 +549,7 @@ def server(input, output, session):
         villes = df_atmo["nom_com"].unique().tolist()
 
         # Fonction qui trace le graphique
-        def graph_influ(villes):
+        def graph_influ():
             pol_influ = df_atmo.groupby(['influence', 'nom_poll'])['valeur'].mean().round(1).unstack(level=0)
             polluants = pol_influ.index.tolist()
             # position des labels et tracé du graphique
@@ -512,7 +569,7 @@ def server(input, output, session):
             h = pol_influ.max().max() + 10
             ax.set_ylim(0, h)
             return fig
-        return graph_influ(villes)
+        return graph_influ()
 app = App(app_ui, server, debug=True)
 ```
 :::
@@ -534,8 +591,10 @@ import numpy as np
 from datetime import datetime
 import matplotlib.pyplot as plt
 
+#les villes
 zone_atmos="'AGDE'","'ALES'","'ARGELES-GAZOST'","'AUCH'","'BELESTA-EN-LAURAGAIS'","'BESSIERES'","'BEZIERS'","'BLAGNAC'","'CORNEILHAN'","'GAUDONVILLE'","'LA CALMETTE'","'LATTES'","'LOURDES'","'LUNEL-VIEL'","'MIRAMONT-DE-COMMINGES'","'MONTGISCARD'","'MONTPELLIER'","'NIMES'","'PEYRUSSE-VIEILLE'","'SAINT-GAUDENS'","'SAINT-GIRONS'","'SAZE'","'TARBES'","'TOULOUSE'"     
 
+#les polluants
 polluant_atmos="'O3'","'NO2'","'NO'","'NOX'","'H2S","'PM10'","'PM2.5'","'SO2'"
 
 app_ui = ui.page_fluid(
@@ -564,6 +623,13 @@ def server(input, output, session):
     @output
     @render.plot
     async def GRAPH_WEEK():
+
+        '''
+        fonction qui 
+            - récupère le résultat de l'appel issu de data()
+            - transforme en dataframe
+            - trace le graphique de l amoyenne des jours selon le polluants choisi et la ville choisie
+        '''
     
         #supprimer les warnings
         pd.options.mode.chained_assignment = None  # default='warn'
@@ -586,7 +652,7 @@ def server(input, output, session):
         polluants = df_atmo["nom_poll"].unique().tolist()
 
         # Fonction qui trace le graphique
-        def graph_week(villes, polluants):
+        def graph_week():
             #suppression station double
             if villes == "MONTPELLIER":
                 df_atmo["nom_station"] = df_atmo["nom_station"].replace(["Montpelier Pere Louis Trafic"], "Montpelier Antigone Trafic")
@@ -625,7 +691,7 @@ def server(input, output, session):
                 axes[i].legend(jour, loc="lower left", bbox_to_anchor=(1, 0.1)).set_visible(True)
                 axes[i].grid(True)
             return fig
-        return graph_week(villes, polluants)
+        return graph_week()
     #@output
     #@render.text
     #async def info1():
