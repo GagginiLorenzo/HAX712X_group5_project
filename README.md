@@ -3,7 +3,7 @@
 Le projet "Occitanie Air Quality Explorer" intègre deux ensembles de données essentiels, à savoir les données atmosphériques (données ATMO) représentant les niveaux de polluants, et les données météorologiques (données SYNOP) fournissant des informations sur les conditions climatiques. Cette approche combinée  permet aux utilisateurs d'explorer les interactions entre la qualité de l'air et les variables météorologiques.
 L'objectif est de développer un site web interactif permettant aux utilisateurs de visualiser simultanément  plusieurs graphiques décrivant l'évolution d'une valeur de polluant en corrélation avec une donnée climatique spécifique.Il permet également d'afficher une carte interactive  offrant une représentation spatiale des données ATMO. Cette carte permet aux utilisateurs de visualiser la répartition géographique des stations de mesure et de comprendre la variabilité des concentrations de polluants dans la région. 
 
-Découvrez par vous-même la qualité de l'air en Occitanie en visitant notre site web interactif : #lien que tu dois mettre ici Lorenzo
+Découvrez par vous-même la qualité de l'air en Occitanie en visitant notre site web interactif : https://gagginilorenzo.github.io/HAX712X_group5_project/q.html
 
 
 # Extrait de code du site ici : 
@@ -61,7 +61,7 @@ def server(input, output, session):
 
 ```
 
-# description de la licence 
+# Description de la licence MIT
 
  La licence utilisée est MIT (Massachusetts Institute of Technology) qui est une licence open source largement utilisée.elle est mise en fichier dans la branche main.
 

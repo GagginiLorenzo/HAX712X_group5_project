@@ -41,7 +41,7 @@ def server(input, output, session):
     def url0():
         vi=str(city.get())
         cond1 = "(nom_poll="+ ') AND ('.join(input.condition1())+')'
-        return f"https://services9.arcgis.com/7Sr9Ek9c1QTKmbwr/arcgis/rest/services/Mesure_horaire_(30j)_Region_Occitanie_Polluants_Reglementaires_1/FeatureServer/0/query?where=(nom_com='{vi}')AND{cond1}&outFields=nom_dept,nom_station,nom_com,nom_poll,valeur,date_debut,date_fin&outSR=4326&f=json"
+        return f"https://services9.arcgis.com/7Sr9Ek9c1QTKmbwr/arcgis/rest/services/Mesure_horaire_(30j)_Region_Occitanie_Polluants_Reglementaires_1/FeatureServer/0/query?where=(code_station='{vi}')AND{cond1}&outFields=nom_dept,nom_station,nom_com,nom_poll,valeur,date_debut,date_fin&outSR=4326&f=json"
     @reactive.Calc
     async def data0():
         response0 = await pyodide.http.pyfetch(url0())
@@ -68,6 +68,7 @@ def server(input, output, session):
         r= dat1
         return r
 
+
     @reactive.Calc
     async def polluant_data():
         r= await data1()
@@ -82,13 +83,57 @@ def server(input, output, session):
         dataO3 = df_atmo.groupby(['nom_dept']).max().reset_index()
         df = pd.DataFrame(dataO3)
         return df
-
-    cm = L.Marker(location=(43.2878,3.504830),title="MONTPELLIER",draggable=False)
+    
+    markers = [
+        L.Marker(location=(43.5915, 3.88681), title="FR50200", draggable=False),
+        L.Marker(location=(43.6113, 3.86626), title="FR50201", draggable=False),
+        L.Marker(location=(43.6051, 3.87464), title="FR50202", draggable=False),
+        L.Marker(location=(43.60994829, 3.898617657), title="FR50203", draggable=False),
+        L.Marker(location=(43.6926, 3.80021), title="FR50204", draggable=False),
+        L.Marker(location=(43.5705, 3.91168), title="FR50205", draggable=False),
+        L.Marker(location=(43.61156038, 3.827978983), title="FR50225", draggable=False),
+        L.Marker(location=(43.57570439, 1.418072093), title="FR50004", draggable=False),
+        L.Marker(location=(43.62358041, 1.438546479), title="FR50021", draggable=False),
+        L.Marker(location=(43.5873309, 1.444026232), title="FR50030", draggable=False),
+        L.Marker(location=(43.56158117, 1.393260062), title="FR50039", draggable=False),
+        L.Marker(location=(43.55641203, 1.403924525), title="FR50040", draggable=False),
+        L.Marker(location=(43.45729083, 1.571484804), title="FR50041", draggable=False),
+        L.Marker(location=(43.62530339, 1.377245933), title="FR50043", draggable=False),
+        L.Marker(location=(43.63347292, 1.375719756), title="FR50044", draggable=False),
+        L.Marker(location=(43.57401353, 1.449589136), title="FR50048", draggable=False),
+        L.Marker(location=(43.64305339, 1.46765185), title="FR50054", draggable=False),
+        L.Marker(location=(43.61032645, 1.415181756), title="FR50821", draggable=False),
+        L.Marker(location=(43.8344, 4.37419), title="FR50211", draggable=False),
+        L.Marker(location=(43.8299, 4.36199), title="FR50212", draggable=False),
+        L.Marker(location=(43.9254, 4.26581), title="FR50213", draggable=False),
+        L.Marker(location=(42.6955, 2.90053), title="FR50220", draggable=False),
+        L.Marker(location=(42.7198, 2.83988), title="FR50221", draggable=False),
+        L.Marker(location=(42.69593509, 2.888446527), title="FR50224", draggable=False),
+        L.Marker(location=(43.09377548, 0.743792653), title="FR50015", draggable=False),
+        L.Marker(location=(43.10560652, 0.719296038), title="FR50016", draggable=False),
+        L.Marker(location=(43.62872527, 0.179064274), title="FR50020", draggable=False),
+        L.Marker(location=(43.92781137, 2.145879865), title="FR50026", draggable=False),
+        L.Marker(location=(43.88395379, 0.845617354), title="FR50029", draggable=False),
+        L.Marker(location=(43.44175891, 1.821396947), title="FR50031", draggable=False),
+        L.Marker(location=(43.09624528, -0.040493309), title="FR50042", draggable=False),
+        L.Marker(location=(43.80318072, 1.595487893), title="FR50047", draggable=False),
+        L.Marker(location=(43.23035205, 0.062463284), title="FR50052", draggable=False),
+        L.Marker(location=(43.61043594, 2.230208516), title="FR50053", draggable=False),
+        L.Marker(location=(44.01285657, 1.375305225), title="FR50060", draggable=False),
+        L.Marker(location=(43.6758, 4.08838), title="FR50206", draggable=False),
+        L.Marker(location=(43.4068, 3.18878), title="FR50209", draggable=False),
+        L.Marker(location=(43.2875, 3.50484), title="FR50210", draggable=False),
+        L.Marker(location=(43.9426, 4.67958), title="FR50216", draggable=False),
+        ]
 
     city = reactive.Value('')
-    def on_click(**kwargs):
-        city.set(cm.title)
-    cm.on_click(on_click)
+    def on_click(marker):
+        def click_handler(**kwargs):
+            city.set(marker.title)
+        return click_handler
+    for i, marker in enumerate(markers, start=1):
+        click_handler = on_click(marker)
+        marker.on_click(click_handler)
 
     @output
     @render_widget
@@ -101,10 +146,11 @@ def server(input, output, session):
         '''
         g=await data2()
         geojson=g
-        d= await polluant_data()
-        df=d
+        df= await polluant_data()
+        
         mymap = L.Map(center=[43.6, 1.44],zoom=7,layout=Layout(height='500px'),)
         colormap= linear.YlOrRd_09.scale(df['valeur'].min(), df['valeur'].max())
+
         for feature in geojson['features']:
             station = df[df['nom_dept'] == feature['properties']['nom']]
             if not station.empty:
@@ -123,33 +169,28 @@ def server(input, output, session):
             },
             )
             mymap.add(geo_json)
-        
-        mymap.add(cm)
+        for i in range(39):
+            mymap.add(markers[i])
         control = L.LayersControl(position='topright')
         mymap.add(control)
+        
         return mymap
 
     @output
     @render.text
     def Clicks():
-        return "ville: " + str(city.get())
+        return "station: " + str(city.get())
 
-    @output
-    @render.text
-    async def info1():
-        return f"Choisir un polluant pour observer les départements d'Occitanie en dégradé de couleurs, ordonnés par maximum du pic de pollution.\n Cliquer sur un marqueur pour observer une ville en particulier."
-    
     @output
     @render.plot
     async def GRAPH_YEAR():
-
         '''
         fonction qui 
             - récupère le résultat de l'appel le dictionnaire issu de data()
             - transforme en dataframe
             - trace le graphique temporel du polluant choisi dans la ville choisi par le click
         '''
-        
+        tps1 = time.time()
         #supprimer les warnings
         pd.options.mode.chained_assignment = None  # default='warn'
 
@@ -158,9 +199,8 @@ def server(input, output, session):
 
         records = dat.get('features', [])
         records_data = [record['attributes'] for record in records]
-        df= pd.DataFrame(records_data)
-        df_atmo=df.loc[lambda d: d['nom_com']=='MONTPELLIER', :]
-        # %%
+        df_atmo= pd.DataFrame(records_data)
+
         df_atmo["date_debut"] = df_atmo["date_debut"]/1000
         df_atmo["date_debut"] = df_atmo["date_debut"].apply(
                     lambda _: datetime.utcfromtimestamp(_)
@@ -206,7 +246,6 @@ def server(input, output, session):
                 axes[i].grid(True)
             return fig
         return graphique(villes, polluants)
-
 app = App(app_ui, server)  
 ```
 :::
