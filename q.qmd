@@ -29,7 +29,7 @@ from shiny import App, Inputs, Outputs, Session, reactive, ui
 polluant_atmos="'O3'","'NO2'","'NO'","'NOX'","'H2S'","'PM10'","'PM2.5'","'SO2'"
 
 app_ui = ui.page_fluid(   
-    ui.input_selectize("condition1", "polluant_atmos", polluant_atmos,multiple = True),
+    ui.input_selectize("condition1", "Polluant", polluant_atmos,multiple = True),
     ui.output_text_verbatim("info1"),
     ui.output_text_verbatim("Clicks"),
     output_widget("map",height='500px'),
@@ -37,7 +37,7 @@ app_ui = ui.page_fluid(
     )
 
 def server(input, output, session):
-
+    # modèle réccurent dans toute la suite : injecté les input de l'utilisateur dans url() ,une requete http a l'API, récupéré les donnée fetch dans data(), puis les exploités
     def url0():
         vi=str(city.get())
         cond1 = "(nom_poll="+ ') AND ('.join(input.condition1())+')'
@@ -71,6 +71,9 @@ def server(input, output, session):
 
     @reactive.Calc
     async def polluant_data():
+        '''
+        FOnction qui place les différentes stations cliquable sur la carte
+        '''
         r= await data1()
         records = r.get('features', [])
         records_data = [record['attributes'] for record in records]
@@ -83,7 +86,7 @@ def server(input, output, session):
         dataO3 = df_atmo.groupby(['nom_dept']).max().reset_index()
         df = pd.DataFrame(dataO3)
         return df
-    
+    #markers ajouter en brute par manques de temps pendant l'integration
     markers = [
         L.Marker(location=(43.5915, 3.88681), title="FR50200", draggable=False),
         L.Marker(location=(43.6113, 3.86626), title="FR50201", draggable=False),
@@ -125,8 +128,9 @@ def server(input, output, session):
         L.Marker(location=(43.2875, 3.50484), title="FR50210", draggable=False),
         L.Marker(location=(43.9426, 4.67958), title="FR50216", draggable=False),
         ]
-
+    
     city = reactive.Value('')
+    #definit une methode qui assigne un marqueur a city pour recupéré sont titre, j'utilise le titre dans la requête http a l'API
     def on_click(marker):
         def click_handler(**kwargs):
             city.set(marker.title)
@@ -369,15 +373,7 @@ def server(input, output, session):
                 axes[i].grid(True)
             return fig
         return graph_year()
-    #@output
-    #@render.text
-    #async def info1():
-    #    if input.selection1() == "":
-    #        return ""
-    #    else:
-    #        d=await data()
-    #        df = d[1]
-    #        return f"Request URL: {url1()}\nResult type: {type(d[1])}\n{df}"
+
 app = App(app_ui, server, debug=True)
 ```
 :::
@@ -426,33 +422,7 @@ app_ui = ui.page_fluid(
 )
 
 def server(input, output, session):
-    #@output
-    #@render.text
-#
-    ####test reussi, stack est une liste de n requêtes (1 par jours), avec toute les donnée occtinanie/jours (environs 60 résultas/jours),
-    ####petit exemple pour des test statiques dans code a implémenter
-#
-    #async def info():
-    #    if input.date2()==" " :
-    #        return " "
-    #    else:
-    #        stack=[]
-    #        r=[]
-    #        select = ','.join(input.selection())
-    #        year=','.join(input.date1())
-    #        month=','.join(input.date2())
-    #        ville=','.join(input.ville())
-#
-    #        ### faire les tests avec l'exrait en local pour pas se faire blacklist par l'api, on étendra une fois le graphe achevé ,'04','05','06','07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30']:
-#
-    #        for n in ['01','02','03']: 
-    #            url=f"https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/donnees-synop-essentielles-omm/records?select=date,nom,{select}&where=year(date)={year} and month(date)={month} and day(date)={n} and code_reg=76 and nom ={ville}&limit=99"
-    #            response = await pyodide.http.pyfetch(url)
-    #            dat = await response.json()
-    #            stack.append(dat)
-    #        q=pformat(stack)
-    #    return  f"{q}"
-
+  #emboitement de 30 appelle pour contourner la limites des 100 record/appel
     @reactive.Calc
     async def data():
         r=[]
@@ -460,7 +430,6 @@ def server(input, output, session):
         year=','.join(input.date1())
         month=','.join(input.date2())
         ville=','.join(input.ville())
-        ### faire les tests avec l'exrait en local pour pas se faire blacklist par l'api, on étendra une fois le graph achever ,'04','05','06','07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30']:
         stack = []
         for n in ['01','02','03','04','05','06','07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30']: 
             url=f"https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/donnees-synop-essentielles-omm/records?select=date,nom,{select}&where=year(date)={year} and month(date)={month} and day(date)={n} and code_reg=76 and nom ={ville}&limit=99"
@@ -524,7 +493,7 @@ app = App(app_ui, server, debug=True)
 ::: {.column-screen-inset}
 
 ::: {.column width="49%"}
-### Représentation de l'influence de la mesure
+### Représentation de l'influence des émetteurrs
 ```{shinylive-python}
 #| standalone: true
 #| viewerHeight: 800
@@ -731,15 +700,6 @@ def server(input, output, session):
                 axes[i].grid(True)
             return fig
         return graph_week()
-    #@output
-    #@render.text
-    #async def info1():
-    #    if input.condition1() == "": #input.selection1() == "":
-    #        return ""
-    #    else:
-    #        d=await data()
-    #        df = d[1]
-    #        return f"Request URL: {url2()}\nResult type: {type(d[1])}\n{df}"
 app = App(app_ui, server, debug=True)
 
 ```
