@@ -14,21 +14,17 @@ format:
 # Table des matières
    1) Introduction
    2) Traitement des données
-       * Atmos
-       * Synop 
    3) Visualisation
-       * Carte intéractive
    4) Intégration et déploiement
-       * Appel API
-       * ShinyLive
    5) Conclusion 
 
 # Introduction
 
 **Objectifs :** un site interactif avec :
 
-   * des graphiques de différents polluants et de données météorologiques pour essayer de voir l'influence de certains paramètres météorologiques sur la pollution
-   * une carte intéractive permettant de sélectionner une ville pour afficher les graphiques
+   * une carte intéractive 
+   * différents types de graphiques 
+   
 
 ::: {.notes}
  un ou plusieurs graphiques simultanément décrivant l'évolution d'une valeur de polluant  ou bien donnée du climat. Tout ceci pourra être conditionné en amont par d'autres choix notamment temporels. 
@@ -36,65 +32,45 @@ format:
 
 # Traitement des données
 
-Deux jeux de données :
+<center>
+![](./Images/traitement.svg){width=70%}
+</center>
 
-   * **Atmos** : mesures de différents polluants dans la région Occitanie. De nombreux choix de types de relevés.
-   * **Synop** : données météorologiques partout en France : sélection obligatoire.
+---
+
+**Deux jeux de données :**
+
+   * **Atmos** : mesures de différents polluants dans la région Occitanie. 
+
+<center>
+![](./Images/polluants.png){width=70%}
+</center>
+
+   * **Synop** : données météorologiques partout en France.
+
+
 
 ## Atmos
 
-Différents traitements en fonction du graphique désiré :
-
-   * une représentation moyenne journalière sur l'année 
-   * une représentation moyenne sur la semaine
-   * une représentation selon la typologie de la station de mesure
-
----
-
-### Représentation moyenne journalière
-
-**Objectif :** Visualiser l'influence de la saisonnalité sur la pollution
-
-**Le résultat :**
+   * Influence des saisons ?
+   * Influence des jours de la semaine ?
+   * Influence des type d'émetteurs ?
 
 <center>
-![](./Images/year.svg)
+![](./Images/questionnement.svg){width=40%}
 </center>
 
- --- 
-
-**Fonction de sélection :**
-
-```{.python code-line-numbers="6-8"}
-def selection(ville, polluant):
-    if ville == "MONTPELLIER":
-        df_atmo["nom_station"] = df_atmo["nom_station"].replace(
-            ["Montpelier Pere Louis Trafic"], "Montpelier Antigone Trafic"
-        )
-    df_1 = df_atmo.loc[
-        (df_atmo["nom_com"] == ville) & (df_atmo["nom_polluant"] == polluant), :
-    ]
-    return df_1
-```
 ---
+
+### Variation selon les saisons ?
+
+<center>
+![](./Images/year.png){width=75%}
+</center>
 
 **Fonction de tracé :**
 
 ```{.python code-line-numbers="15-25"}
-def graphique(ville, polluant):
-    df_pv = selection(ville, polluant)
-    # les différentes stations
-    nom_stations = df_pv["nom_station"].unique()
-    nb_stations = len(nom_stations)
-    # plusieurs graphiques
-    if nb_stations == 1:
-        fig, axes = plt.subplots(1, 1, figsize=(10, 5), layout="constrained")  # Créer une seule sous-figure
-        axes = [axes]  # Mettre l'unique axe dans une liste
-    else:
-        fig, axes = plt.subplots(nb_stations, 1, figsize=(10, 15), sharex=True, layout="constrained")
-    # titre général
-    fig.suptitle("Pollution au " + str(polluant) + " à " + str(ville), fontsize=16)
-
     for i in range(nb_stations):
         # on garde seulement les données de la station i
         df_pvs = df_pv.loc[df_pv["nom_station"] == nom_stations[i]]
@@ -106,30 +82,14 @@ def graphique(ville, polluant):
         df_pvs = df_pvs.set_index(["date_debut"])
         # on moyennise par jour
         axes[i].plot(df_pvs["valeur"].resample("d").mean())
-        # labellisations et titre
-        for label in axes[i].get_xticklabels():
-            label.set_ha("right")
-            label.set_rotation(45)
-        axes[i].set_ylabel("Concentration en µg/m3")
-        axes[i].set_title(
-            "Concentration du " + str(polluant) + " à " + str(nom_stations[i])
-        )
-        axes[i].grid(True)
-    plt.show()
 ```
 ---
 
-### Représentation moyenne sur la semaine
-
-**Objectif :** Visualiser l'influence du jour de la semaine sur la pollution d'une ville pour un polluant donné.
-
-**Résultat :**
+### Effet week-end ?
 
 <center>
-![](./Images/week.svg)
+![](./Images/week.png){height=75%}
 </center>
-
----
 
 **Fonction de tracé :**
 
@@ -145,53 +105,26 @@ def graphique(ville, polluant):
 ```
 ---
 
-### Représentation selon la typologie de la station de mesure
-
-**Objectif :** Visualiser la part de pollution des différents types d'émetteurs
-
-**Résultat :**
+### Influence des différents émetteurs ?
 
 <center>
 ![](./Images/influ.svg)
 </center>
 
 
-
----
-**Fonction de tracé**
-
 ```{.python code-line-numbers="1-3,12-16"}
 pol_influ = df_atmo.groupby(['influence', 'nom_polluant'])[
     'valeur'].mean().round(1).unstack(level=0)
 polluants = pol_influ.index.tolist()
-
-# position des labels et tracé du graphique
-x = np.arange(len(polluants)) + 1  # the label locations
-width = 0.25  # the width of the bars
-multiplier = 0
-
-fig, ax = plt.subplots(layout='constrained')
-
-for attribute, measurement in pol_influ.items():
-    offset = width * multiplier
-    rects = ax.bar(x + offset, measurement, width, label=attribute)
-    ax.bar_label(rects, padding=3)
-    multiplier += 1
-
-ax.set_ylabel('Concentration en µg/m³',fontsize =20)
-ax.set_title('Influence du type de mesure')
-ax.set_xticks(x + width, polluants,fontsize=12)
-ax.legend(loc='upper left', ncols=3)
-ax.set_ylim(0, 90)
-
-plt.show()
-
 ```
-
-
 
 # Visualisation
 
 
 # Intégration et déploiement
-## 
+
+## Appel API
+
+<center>
+![](./Images/api.svg){width=75%}
+</center>
