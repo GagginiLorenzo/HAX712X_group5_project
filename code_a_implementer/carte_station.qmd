@@ -110,10 +110,11 @@ markers_layer = ipyleaflet.MarkerCluster(
             color=colormap.rgb_hex_str(row['valeur']),
             fill_color=colormap.rgb_hex_str(row['valeur']),
             fill_opacity=0.7,
-            popup=ipywidgets.HTML(value=f"{row['nom_station']} - Polluant: {row['valeur']} µg/m³"),    
+            popup=ipywidgets.HTML(value=f"<div style='font-family: Arial; padding: 10px;background-color: #dcffb8;'><strong>Dept: {row['nom_dept']}</strong><br>{row['nom_station']}<br>Polluant: {row['valeur']} µg/m³</div>"),    
             draggable=False,
         )
         for _, row in dff.iterrows()
     ]
 )
+
 mymap.add_layer(markers_layer)
