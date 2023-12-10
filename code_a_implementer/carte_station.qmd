@@ -113,6 +113,42 @@ markers_layer = ipyleaflet.MarkerCluster(
         for _, row in dff.iterrows()
     ]
 )
-
 mymap.add_layer(markers_layer)
-mymap
+import pandas as pd
+
+station = pd.read_csv("station.csv")
+sta = station[~station['NOM_STATION'].str.contains("-", na=False)]
+D = df[~df['nom_station'].str.contains("-", na=False)]
+result = pd.merge(sta, D, left_on='NOM_STATION', right_on='nom_station')
+station
+
+
+
+
+```
+```{python}
+url="https://services9.arcgis.com/7Sr9Ek9c1QTKmbwr/arcgis/rest/services/mesures_occitanie_mensuelle_poll_princ/FeatureServer/0/query?where=1%3D1&outFields=nom_station,code_station,insee_com&outSR=4326&f=json"
+
+
+
+
+response = requests.get(url)
+
+if response.status_code == 200:
+    data = response.json()
+else:
+    print(f"La requête a échoué avec le code d'état {response.status_code}")
+
+
+#%%
+recordss = data.get('features', [])
+
+# Extract 'geometry' and 'attribute' data
+records_data = [{'geometry': record['geometry'], 'attribute': record['attribute']} for record in recordss]
+
+# Create a DataFrame from the extracted data
+dfs = pd.DataFrame(records_data)
+dfs
+
+
+```
