@@ -1,0 +1,25 @@
+---
+title: "PM : particules fines"
+---
+
+Les particules fines (PM) regroupent regroupent deux types de molécules : 
+
+   * PM10 : les particules de diamètre inférieur à 10 µm;
+   * PM2.5 : les particules de dimètre inférieur à 2,5 µm. 
+
+**Source**
+
+Les sources des particules sont multiples et influent sur la composition chimique et la taille de ces de ces dernières. 
+
+La moitié des émissions de PM2.5 sont dues au secteur résidentiel et plus d'un quart au transport routier.
+
+
+**Impact sur la santé**
+
+Aux concentrations auxquelles sont exposées la plupart des populations urbaines et rurales des pays développés et en développement, les particules ont des effets nuisibles sur la santé. L'exposition chronique contribue à augmenter le risque de contracter des maladies cardiovasculaires et respiratoires, ainsi que des cancers pulmonaires. Les effets sur la santé sont dépendants de la taille des particules. Les particules grossières, fraction comprise entre 2.5 µm et 10 µm, ont  des effets sur la santé respiratoire. Concernant la fraction fine des particules, celles inférieures à 2.5 µm, elles impactent à long terme la santé cardiovasculaire.
+
+**Impact sur l'environnement**
+
+Les effets de salissure et de dégradation des monuments et bâtiments constituent les atteintes à l’environnement les plus visibles pour les particules.
+
+

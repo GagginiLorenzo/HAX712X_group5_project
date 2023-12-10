@@ -5,19 +5,14 @@ filters:
   - shinylive
 ---
 ### Carte des stations d'Occitanie
-::: {.column-page-inset}
+::: {.column-page}
 ```{shinylive-python}
 #| standalone: true
-#| viewerHeight: 600
+#| viewerHeight: 1600
 #| column: page
 
-
-########toute les cartes pour polluant safiche bien, mais je n'ai pas encore fais de re-render sur l'html, 
-########donc si vous voulez testez différent polluant pour le moment il faut recharger la pages entière
-########,je corrige ça demain je suis dead x)
-
-
-
+import matplotlib.pyplot as plt
+import time
 from ipywidgets import HTML, Layout
 import ipyleaflet as L
 import json
@@ -31,20 +26,32 @@ import pandas
 from branca.colormap import LinearColormap, linear
 from datetime import datetime
 from shiny import App, Inputs, Outputs, Session, reactive, ui
-polluant_atmos="'O3'","'NO2'","'NO'","'NOX'","'H2S","'PM10'","'PM2.5'","'SO2'"
+polluant_atmos="'O3'","'NO2'","'NO'","'NOX'","'H2S'","'PM10'","'PM2.5'","'SO2'"
 
 app_ui = ui.page_fluid(   
     ui.input_selectize("condition1", "polluant_atmos", polluant_atmos,multiple = True),
     ui.output_text_verbatim("info1"),
-    output_widget("map",height='500px')
+    ui.output_text_verbatim("Clicks"),
+    output_widget("map",height='500px'),
+    ui.output_plot("GRAPH_YEAR",height='800px')
     )
 
 def server(input, output, session):
 
+    def url0():
+        vi=str(city.get())
+        cond1 = "(nom_poll="+ ') AND ('.join(input.condition1())+')'
+        return f"https://services9.arcgis.com/7Sr9Ek9c1QTKmbwr/arcgis/rest/services/Mesure_horaire_(30j)_Region_Occitanie_Polluants_Reglementaires_1/FeatureServer/0/query?where=(nom_com='{vi}')AND{cond1}&outFields=nom_dept,nom_station,nom_com,nom_poll,valeur,date_debut,date_fin&outSR=4326&f=json"
     @reactive.Calc
+    async def data0():
+        response0 = await pyodide.http.pyfetch(url0())
+        dat = await response0.json()
+        r= dat
+        return r
+
     def url1():
         cond1 = "where=(nom_poll="+ ') AND ('.join(input.condition1())+')'
-        return f"https://services9.arcgis.com/7Sr9Ek9c1QTKmbwr/arcgis/rest/services/mesures_occitanie_mensuelle_poll_princ/FeatureServer/0/query?{cond1}&outFields=nom_dept,nom_poll,valeur,date_debut,date_fin&outSR=4326&f=json"
+        return f"https://services9.arcgis.com/7Sr9Ek9c1QTKmbwr/arcgis/rest/services/mesures_occitanie_mensuelle_poll_princ/FeatureServer/0/query?{cond1}&outFields=nom_dept,nom_station,nom_com,nom_poll,valeur,date_debut,date_fin&outSR=4326&f=json"
     @reactive.Calc
     async def data1():
         response1 = await pyodide.http.pyfetch(url1())
@@ -52,7 +59,6 @@ def server(input, output, session):
         r= dat
         return r
 
-    @reactive.Calc
     def url2():
         return "https://france-geojson.gregoiredavid.fr/repo/regions/occitanie/departements-occitanie.geojson"
     @reactive.Calc
@@ -77,13 +83,27 @@ def server(input, output, session):
         df = pd.DataFrame(dataO3)
         return df
 
+    cm = L.Marker(location=(43.2878,3.504830),title="MONTPELLIER",draggable=False)
+
+    city = reactive.Value('')
+    def on_click(**kwargs):
+        city.set(cm.title)
+    cm.on_click(on_click)
+
     @output
     @render_widget
     async def map():
-        geojson= await data2()
-        df= await polluant_data()
-
-        mymap = L.Map(center=[43.6, 1.44],zoom=7,layout=Layout(height='500px'))
+        '''
+        fonction qui 
+            - trace la carte d'Occitanie 
+            - nous centre dessus
+            - mets des couleurs aux départements en fonction de la valeur du polluant choisi.
+        '''
+        g=await data2()
+        geojson=g
+        d= await polluant_data()
+        df=d
+        mymap = L.Map(center=[43.6, 1.44],zoom=7,layout=Layout(height='500px'),)
         colormap= linear.YlOrRd_09.scale(df['valeur'].min(), df['valeur'].max())
         for feature in geojson['features']:
             station = df[df['nom_dept'] == feature['properties']['nom']]
@@ -101,14 +121,96 @@ def server(input, output, session):
             hover_style={
                 'color': 'white', 'dashArray': '0', 'fillOpacity': 0.5
             },
-            
             )
             mymap.add(geo_json)
-        register_widget("map", mymap)
+        
+        mymap.add(cm)
+        control = L.LayersControl(position='topright')
+        mymap.add(control)
+        return mymap
+
+    @output
+    @render.text
+    def Clicks():
+        return "ville: " + str(city.get())
+
+    @output
+    @render.text
+    async def info1():
+        return f"Choisir un polluant pour observer les départements d'Occitanie en dégradé de couleurs, ordonnés par maximum du pic de pollution.\n Cliquer sur un marqueur pour observer une ville en particulier."
+    
+    @output
+    @render.plot
+    async def GRAPH_YEAR():
+
+        '''
+        fonction qui 
+            - récupère le résultat de l'appel le dictionnaire issu de data()
+            - transforme en dataframe
+            - trace le graphique temporel du polluant choisi dans la ville choisi par le click
+        '''
+        
+        #supprimer les warnings
+        pd.options.mode.chained_assignment = None  # default='warn'
+
+        response = await data0()
+        dat = response
+
+        records = dat.get('features', [])
+        records_data = [record['attributes'] for record in records]
+        df= pd.DataFrame(records_data)
+        df_atmo=df.loc[lambda d: d['nom_com']=='MONTPELLIER', :]
+        # %%
+        df_atmo["date_debut"] = df_atmo["date_debut"]/1000
+        df_atmo["date_debut"] = df_atmo["date_debut"].apply(
+                    lambda _: datetime.utcfromtimestamp(_)
+                )
+
+        # liste des villes et des polluants
+        villes = df_atmo["nom_com"].unique().tolist()
+        polluants = df_atmo["nom_poll"].unique().tolist()
+
+        # Fonction qui trace le graphique
+        def graphique(villes, polluants):
+            #on enlève une station double
+            if villes == "MONTPELLIER":
+                df_atmo["nom_station"] = df_atmo["nom_station"].replace(["Montpelier Pere Louis Trafic"], "Montpelier Antigone Trafic")
+            #on renomme
+            df_pv = df_atmo
+            #les différentes stations
+            nom_stations = df_pv["nom_station"].unique()
+            nb_stations = len(nom_stations)
+            
+            ####cas limite 1 station
+            if nb_stations == 1:
+                fig, axes = plt.subplots(1, 1, figsize=(10, 25), layout="constrained")  # Créer une seule sous-figure
+                axes = [axes]  # Mettre l'unique axe dans une liste
+    	    else:
+                fig, axes = plt.subplots(nb_stations, 1, figsize=(10, 25), sharex=True, layout="constrained")
+            
+            #titre général
+            fig.suptitle("Pollution au " + str(polluants[0]) + " à " + str(villes[0])+" ces 30 derniers jours", fontsize=12)
+            for i in range(nb_stations):             
+                df_pvs = df_pv.loc[df_pv["nom_station"] == nom_stations[i]]
+                #datetime devient index
+                df_pvs = df_pvs.set_index(["date_debut"])
+                #on moyennise par jour
+                axes[i].plot(df_pvs["valeur"].resample("d").mean(),)
+                #décorations et titre
+                for label in axes[i].get_xticklabels():
+                    label.set_ha("right")
+                    label.set_rotation(45)
+                axes[i].set_ylabel("µg/m3")
+                axes[i].set_title(
+                    "Concentration du " + str(polluants[0]) + " à " + str(nom_stations[i]),fontsize = 12)
+                axes[i].grid(True)
+            return fig
+        return graphique(villes, polluants)
 
 app = App(app_ui, server)  
 ```
 :::
+
 
 ::: {.column-screen-inset}
 
@@ -126,25 +228,22 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 import matplotlib.pyplot as plt
-import time
 
 
-zone_atmos="'AGDE'","'ALES'","'ARGELES-GAZOST'","'AUCH'","'BELESTA-EN-LAURAGAIS'","'BESSIERES'","'BEZIERS'","'BLAGNAC'","'CORNEILHAN'","'GAUDONVILLE'","'LA CALMETTE'","'LATTES'","'LOURDES'","'LUNEL-VIEL'","'MIRAMONT-DE-COMMINGES'","'MONTGISCARD'","'MONTPELLIER'","'NIMES'","'PEYRUSSE-VIEILLE'","'SAINT-GAUDENS'","'SAINT-GIRONS'","'SAZE'","'TARBES'","'TOULOUSE'"     
+#les différentes villes
+zone_atmos="'AGDE'","'ALES'","'ARGELES-GAZOST'","'AUCH'","'BELESTA-EN-LAURAGAIS'","'BESSIERES'","'BEZIERS'","'BLAGNAC'","'CORNEILHAN'","'GAUDONVILLE'","'LA CALMETTE'","'LATTES'","'LOURDES'","'LUNEL-VIEL'","'MIRAMONT-DE-COMMINGES'","'MONTGISCARD'","'MONTPELLIER'","'NIMES'","'PEYRUSSE-VIEILLE'","'SAINT-GAUDENS'","'SAINT-GIRONS'","'SAZE'","'TARBES'","'TOULOUSE'"
 
+#les polluants
 polluant_atmos="'O3'","'NO2'","'NO'","'NOX'","'H2S","'PM10'","'PM2.5'","'SO2'"
 
+#choix des villes et des polluants
 app_ui = ui.page_fluid(
-    ui.layout_sidebar(
-        ui.panel_sidebar(
-                ui.input_selectize("selection1", "zone_atmos", zone_atmos,multiple = True),
-                ui.input_selectize("condition1", "polluant", polluant_atmos, multiple = True),
+        ui.div(
+                ui.input_selectize("selection1", "Ville", zone_atmos,multiple = True),
+                ui.input_selectize("condition1", "Polluant", polluant_atmos, multiple = True),
                 ui.input_date("date","à partir de"),
+                class_="d-flex gap-3"
                 ),
-        ui.panel_main(
-
-                    ui.output_text_verbatim("info1"),
-                ),
-            ),
     ui.output_plot("GRAPH_YEAR",height='800px'), #
 )
 
@@ -165,12 +264,18 @@ def server(input, output, session):
     @output
     @render.plot
     async def GRAPH_YEAR():
-        tps1 = time.time()
+        '''
+        fonction qui 
+            - récupère le résultat de l'appel le dictionnaire issu de data()
+            - transforme en dataframe
+            - trace le graphique temporel
+        '''
+
         #supprimer les warnings
         pd.options.mode.chained_assignment = None  # default='warn'
 
         response = await data()
-        dat= response[1]
+        dat = response[1]
 
         records = dat.get('features', [])
         records_data = [record['attributes'] for record in records]
@@ -184,12 +289,13 @@ def server(input, output, session):
 
         # liste des villes et des polluants
         villes = df_atmo["nom_com"].unique().tolist()
-        villes.sort()
         polluants = df_atmo["nom_poll"].unique().tolist()
-        polluants.sort()
 
         # Fonction qui trace le graphique
-        def graphique(villes, polluants):
+        def graph_year():
+            '''
+            fonction qui trace le graphique temporel
+            '''
             #on enlève une station double
             if villes == "MONTPELLIER":
                 df_atmo["nom_station"] = df_atmo["nom_station"].replace(["Montpelier Pere Louis Trafic"], "Montpelier Antigone Trafic")
@@ -223,18 +329,16 @@ def server(input, output, session):
                     "Concentration du " + str(polluants[0]) + " à " + str(nom_stations[i]),fontsize = 12)
                 axes[i].grid(True)
             return fig
-            tps2 = time.time()
-            return tps2-tps1
-        return graphique(villes, polluants)
-    @output
-    @render.text
-    async def info1():
-        if input.selection1() == "":
-            return ""
-        else:
-            d=await data()
-            df = d[1]
-            return f"Request URL: {url1()}\nResult type: {type(d[1])}\n{df}"
+        return graph_year()
+    #@output
+    #@render.text
+    #async def info1():
+    #    if input.selection1() == "":
+    #        return ""
+    #    else:
+    #        d=await data()
+    #        df = d[1]
+    #        return f"Request URL: {url1()}\nResult type: {type(d[1])}\n{df}"
 app = App(app_ui, server, debug=True)
 ```
 :::
@@ -242,6 +346,236 @@ app = App(app_ui, server, debug=True)
 ::: {.column width="1%"}
 :::
 
+::: {.column width="49%"}
+### Représentation d'indicateurs météorologiques
+```{shinylive-python}
+#| standalone: true
+#| viewerHeight: 800
+#| column: page
+
+from pprint import pformat
+import pyodide.http
+from shiny import App, reactive, render, ui
+import pandas as pd
+#import numpy as np
+from datetime import datetime
+import matplotlib.pyplot as plt
+
+
+#villes pour synop
+villes = "'GOURDON'","'MILLAU'","'MONTPELLIER'","'PERPIGNAN'","'ST GIRONS'","'TARBES-OSSUN'", "'TOULOUSE-BLAGNAC'" 
+
+#choix des paramètres météorologiques
+choices_synop= "pres", "tc", "tminsolc", #"nom_dept","date", "nom",
+
+#choix des années
+y_synop="2022","2023"
+
+#les mois de l'année
+m_synop="01","02","03","04","05","06","07","06","08","09","10","11","12"
+
+#la sélection
+app_ui = ui.page_fluid(
+        ui.div(
+            ui.input_selectize("ville", "Ville", villes, multiple = True),
+            ui.input_selectize("selection", "Paramètre", choices_synop, multiple = True),
+            ui.input_selectize("date1", "Année", y_synop, multiple = True),
+            ui.input_selectize("date2", "Mois", m_synop, multiple = True),
+            class_="d-flex gap-3"
+        ),
+    ui.output_plot("GRAPH_SYNOP",height='800px')
+)
+
+def server(input, output, session):
+    #@output
+    #@render.text
+#
+    ####test reussi, stack est une liste de n requêtes (1 par jours), avec toute les donnée occtinanie/jours (environs 60 résultas/jours),
+    ####petit exemple pour des test statiques dans code a implémenter
+#
+    #async def info():
+    #    if input.date2()==" " :
+    #        return " "
+    #    else:
+    #        stack=[]
+    #        r=[]
+    #        select = ','.join(input.selection())
+    #        year=','.join(input.date1())
+    #        month=','.join(input.date2())
+    #        ville=','.join(input.ville())
+#
+    #        ### faire les tests avec l'exrait en local pour pas se faire blacklist par l'api, on étendra une fois le graphe achevé ,'04','05','06','07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30']:
+#
+    #        for n in ['01','02','03']: 
+    #            url=f"https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/donnees-synop-essentielles-omm/records?select=date,nom,{select}&where=year(date)={year} and month(date)={month} and day(date)={n} and code_reg=76 and nom ={ville}&limit=99"
+    #            response = await pyodide.http.pyfetch(url)
+    #            dat = await response.json()
+    #            stack.append(dat)
+    #        q=pformat(stack)
+    #    return  f"{q}"
+
+    @reactive.Calc
+    async def data():
+        r=[]
+        select = ','.join(input.selection())
+        year=','.join(input.date1())
+        month=','.join(input.date2())
+        ville=','.join(input.ville())
+        ### faire les tests avec l'exrait en local pour pas se faire blacklist par l'api, on étendra une fois le graph achever ,'04','05','06','07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30']:
+        stack = []
+        for n in ['01','02','03','04','05','06','07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30']: 
+            url=f"https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/donnees-synop-essentielles-omm/records?select=date,nom,{select}&where=year(date)={year} and month(date)={month} and day(date)={n} and code_reg=76 and nom ={ville}&limit=99"
+            response = await pyodide.http.pyfetch(url)
+            dat = await response.json()
+            stack.append(dat)
+        return stack
+    
+    @output
+    @render.plot
+    async def GRAPH_SYNOP():
+        '''
+        fonction qui 
+            - récupère le résultat de l'appel le dictionnaire issu de data()
+            - transforme en dataframe
+            - trace le graphique temporel du paramètre choisi dans la ville choisie en fonction du temps
+        '''
+    
+        #supprimer les warnings
+        pd.options.mode.chained_assignment = None  # default='warn'
+
+        response = await data()
+
+        def process_response(response):
+            dfs = []
+            for item in response:
+                results = item.get("results", [])
+                df = pd.DataFrame(results)
+                dfs.append(df)
+
+            # Concatenate the individual DataFrames into one DataFrame
+            df_synop = pd.concat(dfs, ignore_index=True)
+
+            # Format date
+            df_synop["date"] = df_synop["date"].apply(lambda _: datetime.fromisoformat(_))
+
+            return df_synop
+        
+        df_synop = process_response(response)
+
+        # Fonction qui trace le graphique
+        def graph_synop(df_synop):
+            df_synop = df_synop.set_index(["date"])
+            fig, ax = plt.subplots(layout="constrained")
+            ax.plot(df_synop.iloc[:,1].resample("d").mean())
+            for label in ax.get_xticklabels():
+                label.set_ha("right")
+                label.set_rotation(45)
+            ax.set_title("Valeur de la " + df_synop.columns[1] + " à " + df_synop.iloc[1,0])
+            ax.grid(True)
+            return fig
+        return graph_synop(df_synop)
+app = App(app_ui, server, debug=True)
+```
+:::
+
+:::
+
+
+
+::: {.column-screen-inset}
+
+::: {.column width="49%"}
+### Représentation de l'influence de la mesure
+```{shinylive-python}
+#| standalone: true
+#| viewerHeight: 800
+#| column: page
+from pprint import pformat
+import pyodide.http
+from shiny import App, reactive, render, ui
+import pandas as pd
+import numpy as np
+from datetime import datetime
+import matplotlib.pyplot as plt
+
+
+#les villes
+zone_atmos="'AGDE'","'ALES'","'ARGELES-GAZOST'","'AUCH'","'BELESTA-EN-LAURAGAIS'","'BESSIERES'","'BEZIERS'","'BLAGNAC'","'CORNEILHAN'","'GAUDONVILLE'","'LA CALMETTE'","'LATTES'","'LOURDES'","'LUNEL-VIEL'","'MIRAMONT-DE-COMMINGES'","'MONTGISCARD'","'MONTPELLIER'","'NIMES'","'PEYRUSSE-VIEILLE'","'SAINT-GAUDENS'","'SAINT-GIRONS'","'SAZE'","'TARBES'","'TOULOUSE'"     
+
+
+# La sélection
+app_ui = ui.page_fluid(
+                ui.input_selectize("selection1", "Ville", zone_atmos,multiple = True),
+                ui.output_plot("GRAPH_INFLU",height='800px'), #
+)
+
+def server(input, output, session):
+    def url2():
+        cond1 = "where=(nom_com="+ ') AND ('.join(input.selection1())+')'
+        return f"https://services9.arcgis.com/7Sr9Ek9c1QTKmbwr/arcgis/rest/services/Mesure_horaire_(30j)_Region_Occitanie_Polluants_Reglementaires_1/FeatureServer/0/query?{cond1}&outFields=nom_com,nom_poll,valeur,influence,date_debut&outSR=4326&f=json"
+
+    @reactive.Calc
+    async def data():
+        '''
+        fonction qui 
+            - récupère le résultat de l'appel API de url2() 
+        '''
+        response2 = await pyodide.http.pyfetch(url2())
+        dat2 = await response2.json()
+        r = dat2,dat2
+        return r
+
+    @output
+    @render.plot
+    async def GRAPH_INFLU():
+
+        '''
+        fonction qui 
+            - récupère le résultat de l'appel le dictionnaire issu de data()
+            - transforme en dataframe
+            - trace le graphique de la valeur moyennne des polluants en fonction de la ville et du type d'émetteur 
+        '''
+    
+        #supprimer les warnings
+        pd.options.mode.chained_assignment = None  # default='warn'
+
+        response = await data()
+        dat = response[1]
+
+        records = dat.get('features', [])
+        records_data = [record['attributes'] for record in records]
+        df_atmo = pd.DataFrame(records_data)
+
+        villes = df_atmo["nom_com"].unique().tolist()
+
+        # Fonction qui trace le graphique
+        def graph_influ():
+            pol_influ = df_atmo.groupby(['influence', 'nom_poll'])['valeur'].mean().round(1).unstack(level=0)
+            polluants = pol_influ.index.tolist()
+            # position des labels et tracé du graphique
+            x = np.arange(len(polluants)) + 1  # the label locations
+            width = 0.25  # the width of the bars
+            multiplier = 0
+            fig, ax = plt.subplots(layout='constrained')
+            for attribute, measurement in pol_influ.items():
+                offset = width * multiplier
+                rects = ax.bar(x + offset, measurement, width, label=attribute)
+                ax.bar_label(rects, padding=3)
+                multiplier += 1
+            ax.set_ylabel('µg/m³')
+            ax.set_title('Influence du type de mesure à ' + str(villes[0]))
+            ax.set_xticks(x + width, polluants)
+            ax.legend(loc='upper left') #ncols=3
+            h = pol_influ.max().max() + 10
+            ax.set_ylim(0, h)
+            return fig
+        return graph_influ()
+app = App(app_ui, server, debug=True)
+```
+:::
+
+::: {.column width="1%"}
+:::
 
 ::: {.column width="49%"}
 ### Représentation par jour de la semaine
@@ -257,23 +591,21 @@ import numpy as np
 from datetime import datetime
 import matplotlib.pyplot as plt
 
+#les villes
 zone_atmos="'AGDE'","'ALES'","'ARGELES-GAZOST'","'AUCH'","'BELESTA-EN-LAURAGAIS'","'BESSIERES'","'BEZIERS'","'BLAGNAC'","'CORNEILHAN'","'GAUDONVILLE'","'LA CALMETTE'","'LATTES'","'LOURDES'","'LUNEL-VIEL'","'MIRAMONT-DE-COMMINGES'","'MONTGISCARD'","'MONTPELLIER'","'NIMES'","'PEYRUSSE-VIEILLE'","'SAINT-GAUDENS'","'SAINT-GIRONS'","'SAZE'","'TARBES'","'TOULOUSE'"     
 
+#les polluants
 polluant_atmos="'O3'","'NO2'","'NO'","'NOX'","'H2S","'PM10'","'PM2.5'","'SO2'"
 
 app_ui = ui.page_fluid(
-    ui.layout_sidebar(
-        ui.panel_sidebar(
-                ui.input_selectize("selection1", "zone_atmos", zone_atmos,multiple = True),
-                ui.input_selectize("condition1", "polluant", polluant_atmos, multiple = True),
-                ),
-        ui.panel_main(
-
-                    ui.output_text_verbatim("info1"),
-                ),
+            ui.div(
+                ui.input_selectize("selection1", "Ville", zone_atmos,multiple = True),
+                ui.input_selectize("condition1", "Polluant", polluant_atmos, multiple = True),
+                class_="d-flex gap-3"
             ),
-    ui.output_plot("GRAPH_WEEK",height='800px'), #
-)
+            ui.output_plot("GRAPH_WEEK",height='800px'),
+        )
+
 
 def server(input, output, session):
     def url2():
@@ -291,6 +623,13 @@ def server(input, output, session):
     @output
     @render.plot
     async def GRAPH_WEEK():
+
+        '''
+        fonction qui 
+            - récupère le résultat de l'appel issu de data()
+            - transforme en dataframe
+            - trace le graphique de l amoyenne des jours selon le polluants choisi et la ville choisie
+        '''
     
         #supprimer les warnings
         pd.options.mode.chained_assignment = None  # default='warn'
@@ -310,12 +649,10 @@ def server(input, output, session):
 
         # liste des villes et des polluants
         villes = df_atmo["nom_com"].unique().tolist()
-        villes.sort()
         polluants = df_atmo["nom_poll"].unique().tolist()
-        polluants.sort()
 
         # Fonction qui trace le graphique
-        def graph_week(villes, polluants):
+        def graph_week():
             #suppression station double
             if villes == "MONTPELLIER":
                 df_atmo["nom_station"] = df_atmo["nom_station"].replace(["Montpelier Pere Louis Trafic"], "Montpelier Antigone Trafic")
@@ -354,178 +691,22 @@ def server(input, output, session):
                 axes[i].legend(jour, loc="lower left", bbox_to_anchor=(1, 0.1)).set_visible(True)
                 axes[i].grid(True)
             return fig
-        return graph_week(villes, polluants)
-    @output
-    @render.text
-    async def info1():
-        if input.selection1() == "":
-            return ""
-        else:
-            d=await data()
-            df = d[1]
-            return f"Request URL: {url2()}\nResult type: {type(d[1])}\n{df}"
+        return graph_week()
+    #@output
+    #@render.text
+    #async def info1():
+    #    if input.condition1() == "": #input.selection1() == "":
+    #        return ""
+    #    else:
+    #        d=await data()
+    #        df = d[1]
+    #        return f"Request URL: {url2()}\nResult type: {type(d[1])}\n{df}"
 app = App(app_ui, server, debug=True)
 
 ```
 :::
 
-:::
-
-
-
-::: {.column-screen-inset}
-
-::: {.column width="49%"}
-### Représentation de l'influence de la mesure
-```{shinylive-python}
-#| standalone: true
-#| viewerHeight: 800
-#| column: page
-from pprint import pformat
-import pyodide.http
-from shiny import App, reactive, render, ui
-import pandas as pd
-import numpy as np
-from datetime import datetime
-import matplotlib.pyplot as plt
-
-zone_atmos="'AGDE'","'ALES'","'ARGELES-GAZOST'","'AUCH'","'BELESTA-EN-LAURAGAIS'","'BESSIERES'","'BEZIERS'","'BLAGNAC'","'CORNEILHAN'","'GAUDONVILLE'","'LA CALMETTE'","'LATTES'","'LOURDES'","'LUNEL-VIEL'","'MIRAMONT-DE-COMMINGES'","'MONTGISCARD'","'MONTPELLIER'","'NIMES'","'PEYRUSSE-VIEILLE'","'SAINT-GAUDENS'","'SAINT-GIRONS'","'SAZE'","'TARBES'","'TOULOUSE'"     
-
-app_ui = ui.page_fluid(
-    ui.layout_sidebar(
-        ui.panel_sidebar(
-                ui.input_selectize("selection1", "zone_atmos", zone_atmos,multiple = True),
-                ),
-        ui.panel_main(
-                    ui.output_text_verbatim("info1"),
-                ),
-            ),
-    ui.output_plot("GRAPH_INFLU",height='800px'), #
-)
-
-def server(input, output, session):
-    def url2():
-        cond1 = "where=(nom_com="+ ') AND ('.join(input.selection1())+')'
-        return f"https://services9.arcgis.com/7Sr9Ek9c1QTKmbwr/arcgis/rest/services/Mesure_horaire_(30j)_Region_Occitanie_Polluants_Reglementaires_1/FeatureServer/0/query?{cond1}&outFields=nom_com,nom_poll,valeur,influence,date_debut&outSR=4326&f=json"
-
-    @reactive.Calc
-    async def data():
-        response2 = await pyodide.http.pyfetch(url2())
-        dat2 = await response2.json()
-        r = dat2,dat2
-        return r
-
-    @output
-    @render.plot
-    async def GRAPH_INFLU():
-    
-        #supprimer les warnings
-        pd.options.mode.chained_assignment = None  # default='warn'
-
-        response = await data()
-        dat = response[1]
-
-        records = dat.get('features', [])
-        records_data = [record['attributes'] for record in records]
-        df_atmo = pd.DataFrame(records_data)
-
-        villes = df_atmo["nom_com"].unique().tolist()
-
-        # Fonction qui trace le graphique
-        def graph_influ(villes):
-            pol_influ = df_atmo.groupby(['influence', 'nom_poll'])['valeur'].mean().round(1).unstack(level=0)
-            polluants = pol_influ.index.tolist()
-            # position des labels et tracé du graphique
-            x = np.arange(len(polluants)) + 1  # the label locations
-            width = 0.25  # the width of the bars
-            multiplier = 0
-            fig, ax = plt.subplots(layout='constrained')
-            for attribute, measurement in pol_influ.items():
-                offset = width * multiplier
-                rects = ax.bar(x + offset, measurement, width, label=attribute)
-                ax.bar_label(rects, padding=3)
-                multiplier += 1
-            ax.set_ylabel('µg/m³')
-            ax.set_title('Influence du type de mesure à ' + str(villes[0]))
-            ax.set_xticks(x + width, polluants)
-            ax.legend(loc='upper left') #ncols=3
-            h = pol_influ.max().max() + 10
-            ax.set_ylim(0, h)
-            return fig
-        return graph_influ(villes)
-app = App(app_ui, server, debug=True)
-```
-:::
-
-::: {.column width="1%"}
-:::
-
 
 
 :::
-### TEST GRAPH SYNOP
-::: {.column-page-inset}
 
-```{shinylive-python}
-#| standalone: true
-#| viewerHeight: 1600
-#| column: page
-
-from pprint import pformat
-import pyodide.http
-from shiny import App, reactive, render, ui
-import matplotlib.pyplot as plt
-import pandas as pd
-import numpy as np
-from datetime import datetime
-import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
-
-choices_synop= "date", "nom", "pres", "tc", "tminsolc", "nom_dept", "nom_dept"
-condition_filtres_synop = 'nom="MONTPELLIER"','year(date)="2017"'
-y_synop="2022","2023"
-m_synop="01","02","03","04","05","06","07","06","08","09","10","11","12"
-app_ui = ui.page_fluid(
-    ui.layout_sidebar(
-        ui.panel_sidebar(
-            ui.input_selectize("selection", "Selection_synop", choices_synop, multiple = True),
-            ui.input_selectize("date1", "année", y_synop, multiple = True),
-            ui.input_selectize("date2", "mois", m_synop, multiple = True),
-        ),
-        ui.panel_main(
-            ui.output_text_verbatim("info"),
-            ),
-    )
-)
-def server(input, output, session):
-    @output
-    @render.text
-
-    ###test reussi, stack est une liste de n requêtes (1 par jours), avec toute les donnée occtinanie/jours (environs 60 résultas/jours),
-    ###petit exemple pour des test statiques dans code a implémenter
-
-
-
-    async def info():
-        if input.date2()==" " :
-            return " "
-        else:
-            stack=[]
-            r=[]
-            select = ','.join(input.selection())
-            year=','.join(input.date1())
-            month=','.join(input.date2())
-
-            ### faire les tests avec l'exrait en local pour pas se faire blacklist par l'api, on étendra une fois le graph achever ,'04','05','06','07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30']:
-            
-            for n in ['01','02','03']: 
-                url=f"https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/donnees-synop-essentielles-omm/records?select={select}&where=year(date)={year} and month(date)={month} and day(date)={n} and code_reg=76&limit=99"
-                response = await pyodide.http.pyfetch(url)
-                dat = await response.json()
-                stack.append(dat)
-            q=pformat(stack)
-        return  f"{q}"
-
-app = App(app_ui, server, debug=True)
-```
-:::

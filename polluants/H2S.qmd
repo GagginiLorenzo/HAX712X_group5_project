@@ -1,0 +1,26 @@
+---
+title: "H2S : hydrogène sulfuré"
+---
+
+L’hydrogène sulfuré (H2S) est un gaz incolore, composant naturel du pétrole, à odeur caractéristique d’œufs pourris. Il se dégage des matières organiques en décomposition ou lors de l’utilisation du souffre et des sulfures dans l’industrie chimique. Étant plus lourd que l’air, il s’accumule dans les parties basses non ventilées…
+
+Le dégagement se produit :
+
+   * En présence de matières ou résidus organiques ou minéraux (production de sulfures)
+   * Dans un espace confiné
+    Sous l’effet d’une acidification (qui dépend du pH du milieu).
+
+**NB :** la perception olfactive est décelable à très faible concentration mais ne constitue pas un seuil d’alerte suffisant car elle s’atténue jusqu’à disparaître au fur et à mesure qu’augmente la concentration de gaz (effet de sidération olfactive).
+
+**Quels sont les risques ?**
+
+L’hydrogène sulfuré est un gaz toxique qui pénètre par les voies respiratoires.
+Compte tenu de son caractère insidieux, l’exposition à ce gaz revêt souvent un caractère accidentel qui peut être fatal.
+
+Risques pour la santé :
+
+   * Des intoxications aiguës (exposition de courte durée) : troubles respiratoires, irritations oculaires, conjonctivites, vertiges, céphalées, œdème aigu du poumon, pertes de connaissance (« plomb des vidangeurs »)
+   * Des intoxications chroniques (exposition prolongée) : bronchites irritatives, irritations cutanées
+   * Des pertes de connaissance à partir de 500 ppm
+   * Une possibilité d’accident mortel très rapide en cas de fortes inhalations (> 1000 ppm)
+

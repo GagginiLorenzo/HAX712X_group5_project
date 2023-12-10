@@ -1,56 +1,21 @@
 # Occitanie air quality explorer
-L'objectif du projet est de créer une application web dans laquelle il sera possible de visualiser un ou plusieurs graphiques simultanément décrivant l'évolution d'une valeur de polluant en fonction d'une donnée du climat. Tout ceci pourra être conditionné en amont par d'autres choix notamment temporels. Cela permettra de visualiser différents types de graphiques concernant les polluants.
+
+Le projet "Occitanie Air Quality Explorer" intègre deux ensembles de données essentiels, à savoir les données atmosphériques (données ATMO) représentant les niveaux de polluants, et les données météorologiques (données SYNOP) fournissant des informations sur les conditions climatiques. Cette approche combinée  permet aux utilisateurs d'explorer les interactions entre la qualité de l'air et les variables météorologiques.
+L'objectif est de développer un site web interactif permettant aux utilisateurs de visualiser simultanément  plusieurs graphiques décrivant l'évolution d'une valeur de polluant en corrélation avec une donnée climatique spécifique.Il permet également d'afficher une carte interactive  offrant une représentation spatiale des données ATMO. Cette carte permet aux utilisateurs de visualiser la répartition géographique des stations de mesure et de comprendre la variabilité des concentrations de polluants dans la région. 
+
+Découvrez par vous-même la qualité de l'air en Occitanie en visitant notre site web interactif : #lien que tu dois mettre ici Lorenzo
 
 
-```{mermaid}
-flowchart TD
-    A[Zone] --> B[Condition]
-    B --> D[Pollution]
-    B --> E[Climat]
-    E --> G[Graphique]
-    D --> G
-```
-
-Le code s'articulera comme suit :
+# Extrait de code du site ici : 
 
 
-```{mermaid}
-flowchart TD
-    A[OpenDataSoft]
-    B[Data Atmo Occitanie]
-    C{{API REST}}
-    D[Jupyter Notebook]
-    E{{Jupyter Widgets}}
-    F{{Quarto}}
-    G[GitHub Pages]
 
-    A-->C
-    B-->C
-    C-->D
-    E-->D
-    D-->F & E
-    F-->G
-```
+# description de la licence 
 
-De plus, nous créerons une carte intéractive cliquable de la région Occitanie à la précision du canton pour obtenir un traitement suffisamment fin, l'échelle du département étant à priori trop grande. Toutefois, nous serons peut-être amené à changer celà en fonction de l'exploration des données. 
+ 
 
-Pour faire tout ça, nous nous organiserons en quatre phases  : 
+ 
 
-* **phase 1** : la sélection des données
-    - Restapi : demande python vers url
-    - Parsing : découpage du fichier json en catégorie (date à priori)
-    - Traduction : du json vers PythonDict
-    - Liste des données sélectionnées
-    
-* **phase 2** : Traitement des données
-    - Carte intéractive
-    - Graphique
-    
-* **phase 3** : Interface utilisateur 
-
-* **phase 4** : Documentation, Beamer 
-
-Durant le développement du projet, l'IDE commun sera Jupyter-Notebook.
 
 **Organisation temporelle du projet**
 
@@ -72,7 +37,7 @@ gantt
 ```
 
 
-Nous avons donc créé deux branches et la branche principale(main) correspondant aux trois phases principales du projet :  le traitement des données (data) et la carte interactive (visu) et l'interface utilisateur (main). Ceci nous permettra de travailler en parallèle sur les différents aspects du projet dès que cela sera possible.
+
 
 ## Choix des données
 
@@ -140,7 +105,7 @@ Enfin pour la page web, nous nous servirons Quarto qui sintègre bien à l'ensem
 
 ## Documentation et beamer
 
-Pour la documentation, nous utiliserons la librairie Sphynx et pour la réalisation du diaporama de présentation, nous passerons par l'interface de Quarto. 
+Pour la réalisation du diaporama de présentation, nous utilisons quarto . 
 
 ## Membres et contact
 
@@ -149,3 +114,4 @@ Pour la documentation, nous utiliserons la librairie Sphynx et pour la réalisat
 - Hamomi Majda : majda.hamomi@etu.umontpellier.fr
 - Gaggini Lorenzo : lorenzo.gaggini@etu.umontpellier.fr
 - Ollier Julien : julien.ollier@etu.umontpellier.fr
+
