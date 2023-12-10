@@ -1,0 +1,37 @@
+```{python}
+import requests
+import ipyleaflet
+import ipywidgets as widgets
+import geopandas as gpd
+import random
+import pandas as pd
+import numpy as np
+from datetime import datetime
+import requests
+from branca.colormap import linear
+from folium import Choropleth
+import folium
+from ipyleaflet import Map, GeoJSON
+import ipyleaflet
+import ipywidgets as widgets
+import geopandas as gpd
+import random
+from branca.colormap import LinearColormap
+#supprimer les warnings
+pd.options.mode.chained_assignment = None  # default='warn'
+ 
+
+url = "https://services9.arcgis.com/7Sr9Ek9c1QTKmbwr/arcgis/rest/services/mesures_occitanie_mensuelle_poll_princ/FeatureServer/0/query?where=1%3D1&outFields=nom_com,nom_dept,nom_station,x_l93,y_l93,nom_poll,valeur&outSR=4326&f=json"
+
+response = requests.get(url)
+
+if response.status_code == 200:
+    data = response.json()
+else:
+    print(f"La requête a échoué avec le code d'état {response.status_code}")
+
+
+#%%
+records = data.get('features', [])
+records_data = [record['attributes'] for record in records]
+df_atmo = pd.DataFrame(records_data)
