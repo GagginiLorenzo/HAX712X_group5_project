@@ -66,3 +66,24 @@ dataNO2 = dataNO2_8.groupby(['nom_station', 'nom_poll']).max().reset_index()
 # Charger les données des stations des villes dans la région Occitanie
 
 df = pd.DataFrame(dataO3)
+
+geojson_path = "https://france-geojson.gregoiredavid.fr/repo/regions/occitanie/departements-occitanie.geojson"
+response = requests.get(geojson_path)
+geojson = response.json()
+
+data = {
+    "nom_dept": ["ARIEGE", "AVEYRON", "GARD", "GARD", "GARD", "GARD", "GARD", "GERS", "GERS", "GERS"],
+    "nom_com": ["Saint-Girons", "Rodez", "Ales", "LA calmette", "Nimes", "Nimes", "Saze", "Auch", "Gaudonville", "PEYRUSSE-VIEILLE"],
+    "nom_station": ["St-Girons Urbain", "Rodez - Camonil Urbain", "Ales Vauban fond", "La Calmette - Périurbain", "Nîmes - Planas - Trafic", "Nîmes Sud - Urbain", "Saze - rural", "AUCH ST EXUPERY", "Gaudonville Rural", "Peyrusse Vieille Rural"],
+    "x_wgs84": [1.13943, 2.5707, 4.07548, 4.26581, 4.36199, 4.37422, 4.67969, 0.59467, 0.845617, 0.179722],
+    "y_wgs84": [42.99, 44.357, 44.1259, 43.9254, 43.8299, 43.8344, 43.9429, 43.6511, 43.884, 43.6303],
+    "valeur": [20, 100, 30, 12, 60, 18, 7, 9, 11, 39]  # Exemple de données de polluants (à remplacer par vos propres données)
+}
+
+dff = pd.DataFrame(data)
+
+
+colormap= linear.YlOrRd_09.scale(dff['valeur'].min(), dff['valeur'].max())
+# Créer la carte avec ipyleaflet
+mymap = ipyleaflet.Map(center=(43.6, 2.5), zoom=7.5)
+
