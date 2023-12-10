@@ -117,26 +117,34 @@ pol_influ = df_atmo.groupby(['influence', 'nom_polluant'])[
     'valeur'].mean().round(1).unstack(level=0)
 polluants = pol_influ.index.tolist()
 ```
-
 # Visualisation
-<!-- Diapositive 1 -->
-##### Premier aperçu de la division par département de la carte de la région Occitanie, présenté sur cette figure interactive
+
 <center>
-  <img src="./Images/fig1.PNG" alt="Description de l'image" style="width: 70%; height: auto;">
+  <img src="./Images/im.jpg" alt="Description de l'image" style="width: 80%; height: auto;">
 </center>
-
-<!-- Diapositive 2 -->
-##### Visualisation des concentrations du polluant O3 à travers les différentes stations de mesure dans la région Occitanie.
-
+#
+   <p style="font-size: 30px;">Premier aperçu de la division par département de la carte de la région Occitanie, présenté sur cette figure interactive.</p>
 <center>
-  <img src="./Images/imO3.PNG" alt="Description de l'image" style="width: 70%; height: auto;">
+  <img src="./Images/fig1.PNG" alt="Description de l'image" style="width: 80%; height: auto;">
 </center>
-
-<!-- Diapositive 3 -->
-##### Analyse détaillée des niveaux de pollution en 03 au sein d'une station spécifique.
+<style>
+  body {
+    font-size: 18px; 
+    color: #3366cc; 
+  }
+</style>
+#
+   <p style="font-size: 30px;">Visualisation des concentrations du polluant O3 à travers les différentes stations de mesure dans la région Occitanie.</p>
 
 <center>
-  <img src="./Images/im2O3.PNG" alt="Description de l'image" style="width: 70%; height: auto;">
+  <img src="./Images/imO3.PNG" alt="Description de l'image" style="width: 80%; height: auto;">
+</center>
+#
+
+   <p style="font-size: 30px;">Analyse détaillée des niveaux de pollution en 03 au sein d'une station spécifique.</p>
+
+<center>
+  <img src="./Images/im2O3.PNG" alt="Description de l'image" style="width: 80%; height: auto;">
 </center>
 
 
