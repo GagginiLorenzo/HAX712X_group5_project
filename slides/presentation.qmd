@@ -1,8 +1,8 @@
 ---
 title: "<p style='font-size: 100px; color: #3366cc;'>Occitanie air quality explorer</p>"
-author: ABCHICHE Thiziri
-        BERNARD-REYMOND Guillaume
-        GAGGINI Lorenzo 
+author: ABCHICHE Thiziri,
+        BERNARD-REYMOND Guillaume,  
+        GAGGINI Lorenzo, 
         HAMOMI Majda
 format: 
   revealjs:
@@ -15,7 +15,7 @@ format:
    1) Introduction
    2) Traitement des données
    3) Visualisation
-   4) Intégration et déploiement
+   4) Déploiement
    5) Conclusion 
 
 # Introduction
@@ -33,7 +33,7 @@ format:
 # Traitement des données
 
 <center>
-![](./Images/traitement.svg){width=70%}
+![](./Images/traitement.jpg){width=70%}
 </center>
 
 ---
@@ -123,7 +123,7 @@ polluants = pol_influ.index.tolist()
   <img src="./Images/im.jpg" alt="Description de l'image" style="width: 80%; height: auto;">
 </center>
 #
-   <p style="font-size: 30px;">Premier aperçu de la division par département de la carte de la région Occitanie, présenté sur cette figure interactive.</p>
+   <p style="font-size: 30px;">Premier aperçu de la division par département de la région Occitanie présenté sur cette carte interactive.</p>
 <center>
   <img src="./Images/fig1.PNG" alt="Description de l'image" style="width: 80%; height: auto;">
 </center>
@@ -134,7 +134,7 @@ polluants = pol_influ.index.tolist()
   }
 </style>
 #
-   <p style="font-size: 30px;">Visualisation des concentrations du polluant O3 à travers les différentes stations de mesure dans la région Occitanie.</p>
+   <p style="font-size: 30px;">Visualisation des concentrations du polluant O3 dans les différentes stations de mesure de la région Occitanie.</p>
 
 <center>
   <img src="./Images/imO3.PNG" alt="Description de l'image" style="width: 80%; height: auto;">
@@ -147,9 +147,9 @@ polluants = pol_influ.index.tolist()
   <img src="./Images/im2O3.PNG" alt="Description de l'image" style="width: 80%; height: auto;">
 </center>
 
+# Déploiement 
 
----
-# Intégration et déploiement
+<img src="./Images/deploy.jpg" style="width: 80%; height: auto;">
 
 ## Appel API
 
@@ -159,51 +159,37 @@ polluants = pol_influ.index.tolist()
 
 ## Le flot de donnée
 
-   * La proposition : Communiqué avec des bases de donné et executer du codes python depuis une page web statiques déployer sur github
+   * **La proposition :** Communiquer avec des bases de données et exécuter du code Python depuis une page web statique déployée sur Github.
 
 ## Le flot de donnée
-   * La proposition : Communiqué avec des bases de donné et executer du codes python depuis une page web statiques déployer sur github
+   * **La proposition :** Communiquer avec des bases de données et exécuter du code Python depuis une page web statique déployée sur Github.
 
-   * Objectif : Etablir un flot de donnée entre les bases de donnée et une Ghitube page
+   * **Objectif :** Etablir un flot de données entre les bases de données et une Ghitub-page
 
 ## Le flot de donnée
 
-   * La proposition : Communiqué avec des bases de donné et executer du codes python depuis une page web statiques déployer sur github
+   * **La proposition :** Communiquer avec des bases de données et exécuter du code Python depuis une page web statique déployée sur Github.
 
-   * Objectif : Etablir un flot de donnée entre les bases de donnée et une Ghitube page
+   * **Objectif :** Etablir un flot de données entre les bases de données et une Ghitub-page
 
-   * Enjeux : page web hébergé sur un serveur statiques, contraintes techniques
+   * **Enjeux :** page web hébergée sur un serveur statique : contraintes techniques
 
 
 ## ShinyLive
 
-   * Solution qui respecte les contraintes du projet : Documenter et supporter comme extension de quarto
+   * Solution qui respecte les contraintes du projet : documentée et supportée comme extension de quarto
 
 ## ShinyLive
 
-   * Solution qui respecte les contraintes du projet : Documenter et supporter comme extension de quarto
+   * Solution qui respecte les contraintes du projet : documentée et supportée comme extension de quarto
 
    * Satisfait aux ambitions dynamiques du projet
 
 ## ShinyLive
 
-   * Solution qui respecte les contraintes du projet : Documenter et supporter comme extension de quarto
+   * Solution qui respecte les contraintes du projet : documentée et supportée comme extension de quarto
 
    * Satisfait aux ambitions dynamiques du projet
 
-   * Permet une interractivité totale entre les modules
-
----
-
-
-
-
-
-
-
-
-
-
-
-
-## 
+   * Permet une interactivité totale entre les modules
+ 
