@@ -54,7 +54,7 @@ format:
 
    * Influence des saisons ?
    * Influence des jours de la semaine ?
-   * Influence des type d'émetteurs ?
+   * Influence des types d'émetteurs ?
 
 <center>
 ![](./Images/questionnement.svg){width=40%}
@@ -119,15 +119,15 @@ polluants = pol_influ.index.tolist()
 ```
 ---
 
-Evolution au cours du projet :
+<p style="font-size: 50px;"> <b> Evolution au cours du projet :</b> </p>
 
-   * travail en local : 
+   * **Travail en local :** 
       - jeu de données complet en csv
       - sélection 
-   * appel API : 
+   * **Appel API :** 
       - package request
       - format json
-   * intégration : 
+   * **Intégration :** 
       - sélection dans l'appel API
 
 # Visualisation
