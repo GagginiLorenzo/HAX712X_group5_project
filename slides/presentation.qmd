@@ -117,6 +117,19 @@ pol_influ = df_atmo.groupby(['influence', 'nom_polluant'])[
     'valeur'].mean().round(1).unstack(level=0)
 polluants = pol_influ.index.tolist()
 ```
+---
+
+Evolution au cours du projet :
+
+   * travail en local : 
+      - jeu de données complet en csv
+      - sélection 
+   * appel API : 
+      - package request
+      - format json
+   * intégration : 
+      - sélection dans l'appel API
+
 # Visualisation
 
 <center>
