@@ -13,7 +13,7 @@ format:
 
 # Introduction
 
-**Objectifs :** un site interactif avec :
+**Objectifs :** un site intéractif avec :
 
    * une carte intéractive 
    * différents types de graphiques 
@@ -24,11 +24,6 @@ format:
    3) Visualisation
    4) Déploiement
    5) Conclusion 
-
-
-::: {.notes}
- un ou plusieurs graphiques simultanément décrivant l'évolution d'une valeur de polluant  ou bien donnée du climat. Tout ceci pourra être conditionné en amont par d'autres choix notamment temporels. 
-:::
 
 # Traitement des données
 
@@ -95,13 +90,13 @@ format:
 
 ```{.python}
 # colonne avec le numéro des jours
-        df_pvs["weekday"] = df_pvs.index.weekday
-        # on regroupe par jour et on fait la moyenne
-        pollution_week = (
-            df_pvs.groupby(["weekday", df_pvs.index.hour])["valeur"]
-            .mean()
-            .unstack(level=0)
-        )
+   df_pvs["weekday"] = df_pvs.index.weekday
+   # on regroupe par jour et on fait la moyenne
+   pollution_week = (
+       df_pvs.groupby(["weekday", df_pvs.index.hour])["valeur"]
+       .mean()
+       .unstack(level=0)
+   )
 ```
 ---
 
@@ -144,7 +139,7 @@ polluants = pol_influ.index.tolist()
 </center>
 #
 
-   <p style="font-size: 30px;">Analyse détaillée des niveaux de pollution en 03 au sein d'une station spécifique.</p>
+   <p style="font-size: 30px;">Analyse détaillée des niveaux de pollution en O3 au sein d'une station spécifique.</p>
 
 <center>
   <img src="./Images/im2O3.PNG" alt="Description de l'image" style="width: 80%; height: auto;">
@@ -170,21 +165,21 @@ polluants = pol_influ.index.tolist()
 
 ## ShinyLive
 
-   * Solution qui respecte les contraintes du projet : documentée et supportée comme extension de quarto
+   * Respecte les contraintes du projet : documentée et supportée comme extension de quarto
 
 ## ShinyLive
 
-   * Solution qui respecte les contraintes du projet : documentée et supportée comme extension de quarto
+   * Respecte les contraintes du projet : documentée et supportée comme extension de quarto
 
    * Satisfait aux ambitions dynamiques du projet
 
 ## ShinyLive
 
-   * Solution qui respecte les contraintes du projet : documentée et supportée comme extension de quarto
+   * Respecte les contraintes du projet : documentée et supportée comme extension de quarto
 
    * Satisfait aux ambitions dynamiques du projet
 
-   * Permet une interactivité totale entre les modules
+   * Interactivité totale entre les modules
 
 <center>
 ![](./Images/shiny.png){width=90%}
@@ -205,7 +200,7 @@ polluants = pol_influ.index.tolist()
 
    * **Objectif :** Etablir un flot de données entre les bases de données et une Ghitub-page
 
-   * **Enjeux :** page web hébergée sur un serveur statique : contraintes techniques
+   * **Enjeux :** Page web hébergée sur un serveur statique : contraintes techniques
 
 <center>
 ![](./Images/flow.svg){width=75%}
