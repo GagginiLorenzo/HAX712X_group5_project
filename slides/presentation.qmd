@@ -149,6 +149,11 @@ polluants = pol_influ.index.tolist()
 <center>
   <img src="./Images/im2O3.PNG" alt="Description de l'image" style="width: 80%; height: auto;">
 </center>
+#
+<center>
+  <img src="./Images/p.PNG" alt="Description de l'image" style="width: 100%; height: auto;">
+</center>
+
 
 #
 <center>
