@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Occitanie air quality explorer</title>
+        <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+        
+    </head>
+    <body class="vscode-body vscode-light">
+        <h1 id="occitanie-air-quality-explorer">Occitanie air quality explorer</h1>
+<p>Le projet &quot;Occitanie Air Quality Explorer&quot; intègre deux ensembles de données essentiels, à savoir les données atmosphériques (données ATMOS) représentant les niveaux de polluants, et les données météorologiques (données SYNOP) fournissant des informations sur les conditions climatiques. Cette approche combinée permet aux utilisateurs d'explorer les interactions entre la qualité de l'air et les variables météorologiques.</p>
+<p>L'objectif est de développer un site web interactif permettant aux utilisateurs de visualiser simultanément  plusieurs graphiques décrivant l'évolution d'une valeur de polluant en corrélation avec une donnée climatique <a href="http://xn--spcifique-c4a.Il">spécifique.Il</a> permet également d'afficher une carte interactive  offrant une représentation spatiale des données ATMO. Cette carte permet aux utilisateurs de visualiser la répartition géographique des stations de mesure et de comprendre la variabilité des concentrations de polluants dans la région.</p>
+<p>Découvrez par vous-même la qualité de l'air en Occitanie en visitant notre site web interactif : <a href="https://gagginilorenzo.github.io/HAX712X_group5_project/q.html">https://gagginilorenzo.github.io/HAX712X_group5_project/q.html</a></p>
+<h1 id="extrait-de-code-du-site-ici-">Extrait de code du site ici :</h1>
+<pre><code class="language-python">---
+title: Occitanie Quality Air Explorer
+<span class="hljs-built_in">format</span>: html
+filters:
+  - shinylive
+---
+<span class="hljs-comment">### Carte des stations d&#x27;Occitanie</span>
+::: {.column-page}
+```{shinylive-python}
+<span class="hljs-comment">#| standalone: true</span>
+<span class="hljs-comment">#| viewerHeight: 1600</span>
+<span class="hljs-comment">#| column: page</span>
+
+<span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+<span class="hljs-keyword">import</span> time
+<span class="hljs-keyword">from</span> ipywidgets <span class="hljs-keyword">import</span> HTML, Layout
+<span class="hljs-keyword">import</span> ipyleaflet <span class="hljs-keyword">as</span> L
+<span class="hljs-keyword">import</span> json
+<span class="hljs-keyword">import</span> random
+<span class="hljs-keyword">import</span> pandas <span class="hljs-keyword">as</span> pd
+<span class="hljs-keyword">from</span> io <span class="hljs-keyword">import</span> StringIO  <span class="hljs-comment"># Importez StringIO depuis io</span>
+<span class="hljs-keyword">from</span> shiny <span class="hljs-keyword">import</span> App, render, ui,reactive 
+<span class="hljs-keyword">from</span> shinywidgets <span class="hljs-keyword">import</span> output_widget, reactive_read, render_widget, register_widget
+<span class="hljs-keyword">import</span> pyodide.http
+<span class="hljs-keyword">import</span> pandas
+<span class="hljs-keyword">from</span> branca.colormap <span class="hljs-keyword">import</span> LinearColormap, linear
+<span class="hljs-keyword">from</span> datetime <span class="hljs-keyword">import</span> datetime
+<span class="hljs-keyword">from</span> shiny <span class="hljs-keyword">import</span> App, Inputs, Outputs, Session, reactive, ui
+polluant_atmos=<span class="hljs-string">&quot;&#x27;O3&#x27;&quot;</span>,<span class="hljs-string">&quot;&#x27;NO2&#x27;&quot;</span>,<span class="hljs-string">&quot;&#x27;NO&#x27;&quot;</span>,<span class="hljs-string">&quot;&#x27;NOX&#x27;&quot;</span>,<span class="hljs-string">&quot;&#x27;H2S&#x27;&quot;</span>,<span class="hljs-string">&quot;&#x27;PM10&#x27;&quot;</span>,<span class="hljs-string">&quot;&#x27;PM2.5&#x27;&quot;</span>,<span class="hljs-string">&quot;&#x27;SO2&#x27;&quot;</span>
+
+app_ui = ui.page_fluid(   
+    ui.input_selectize(<span class="hljs-string">&quot;condition1&quot;</span>, <span class="hljs-string">&quot;polluant_atmos&quot;</span>, polluant_atmos,multiple = <span class="hljs-literal">True</span>),
+    ui.output_text_verbatim(<span class="hljs-string">&quot;info1&quot;</span>),
+    ui.output_text_verbatim(<span class="hljs-string">&quot;Clicks&quot;</span>),
+    output_widget(<span class="hljs-string">&quot;map&quot;</span>,height=<span class="hljs-string">&#x27;500px&#x27;</span>),
+    ui.output_plot(<span class="hljs-string">&quot;GRAPH_YEAR&quot;</span>,height=<span class="hljs-string">&#x27;800px&#x27;</span>)
+    )
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">server</span>(<span class="hljs-params"><span class="hljs-built_in">input</span>, output, session</span>):
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">url0</span>():
+        vi=<span class="hljs-built_in">str</span>(city.get())
+        cond1 = <span class="hljs-string">&quot;(nom_poll=&quot;</span>+ <span class="hljs-string">&#x27;) AND (&#x27;</span>.join(<span class="hljs-built_in">input</span>.condition1())+<span class="hljs-string">&#x27;)&#x27;</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-string">f&quot;https://services9.arcgis.com/7Sr9Ek9c1QTKmbwr/arcgis/rest/services/Mesure_horaire_(30j)_Region_Occitanie_Polluants_Reglementaires_1/FeatureServer/0/query?where=(nom_com=&#x27;<span class="hljs-subst">{vi}</span>&#x27;)AND<span class="hljs-subst">{cond1}</span>&amp;outFields=nom_dept,nom_station,nom_com,nom_poll,valeur,date_debut,date_fin&amp;outSR=4326&amp;f=json&quot;</span>
+<span class="hljs-meta">    @reactive.Calc</span>
+    <span class="hljs-keyword">async</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">data0</span>():
+        response0 = <span class="hljs-keyword">await</span> pyodide.http.pyfetch(url0())
+        dat = <span class="hljs-keyword">await</span> response0.json()
+        r= dat
+        <span class="hljs-keyword">return</span> r 
+
+</code></pre>
+<h1 id="description-de-la-licence-mit">Description de la licence MIT</h1>
+<p>La licence utilisée est MIT (Massachusetts Institute of Technology) qui est une licence open source largement utilisée.elle est mise en fichier dans la branche main.</p>
+<p>Permission d'Utilisation : Toute personne qui obtient une copie du logiciel est autorisée à l'utiliser, le copier, le modifier, le fusionner, le publier, le distribuer, le sous-licencier ou le vendre, et ceci gratuitement.</p>
+<p>Conditions de Licence : L'utilisateur doit inclure l'avis de copyright (copyright notice) indiqué dans le texte de la licence ainsi que l'avis de permission (permission notice) dans toutes les copies ou portions substantielles du logiciel.</p>
+<p>Absence de Garantie : Le logiciel est fourni &quot;tel quel&quot;, sans aucune garantie. Les auteurs ou détenteurs du copyright ne fournissent aucune garantie explicite ou implicite, y compris, mais sans s'y limiter, les garanties de qualité marchande, d'adéquation à un usage particulier et d'absence de contrefaçon.</p>
+<p>*Responsabilité Limitée : En aucun cas, les auteurs ou détenteurs du copyright ne peuvent être tenus responsables de toute réclamation, dommage ou autre responsabilité, que ce soit dans le cadre d'une action contractuelle, délictuelle ou autre, découlant de l'utilisation du logiciel ou en relation avec celui-ci.</p>
+<h2 id="choix-des-données">Choix des données</h2>
+<p>La mesure de la quantité d'un polluant dépend du mois et de l'heure à laquelle elle est effectuée. En effet cette quantité dépend du moment de l'année : la consommation de gaz, donc la pollution qu'elle engendre, est plus importante en hiver qu'en été. L'heure de mesure joue aussi son rôle, et à titre d'exemple, on peut citer la pollution générée par les voitures aux heures de pointe. Nous sommes donc contraints de choisir le dataset Atmo intitulé : &quot;Mesures horaires 1 an glissant&quot;. Toutefois ce jeu de données ne fonctionnant pas pour les appels API, nous nous sommes rabatttus sur les mesures journalières annuelles et les mesures horaires des 30 derniers jours.</p>
+<p>Une première exploration rapide semble montrer que ce n'est pas du tout le cas sur les données Synop. Si la station d'enregistrement est correcte, le reste par contre laisse à désirer. Toutefois, nous ne nous sommes intéressés qu'à peu de paramètres : pression et température, les autres ne nous semblant pas pertinents.</p>
+<h2 id="interface-utilisée">Interface utilisée</h2>
+<p>Le projet est intégré dans une page Quarto. On y retrouve différentes capsules faites avec ShinyLive.</p>
+<p>Voici les différents packages utilisés selon les besoins :</p>
+<ul>
+<li>capsules d'affichage : shiny, shinylive, shinywidgets</li>
+<li>importation des données : pyodide</li>
+<li>traitement des données : json, pandas, numpy</li>
+<li>graphiques : matplotlib</li>
+<li>carte intéractive : ipyleaflet, ipywidgets, branca,</li>
+</ul>
+<h2 id="membres-et-contact">Membres et contact</h2>
+<ul>
+<li>Abchiche Thiziri : <a href="mailto:thiziri.abchiche@etu.umontpellier.fr">thiziri.abchiche@etu.umontpellier.fr</a></li>
+<li>Bernard-Reymond Guillaume : <a href="mailto:guillaume.bernard-reymond@etu.umontpellier.fr">guillaume.bernard-reymond@etu.umontpellier.fr</a></li>
+<li>Hamomi Majda : <a href="mailto:majda.hamomi@etu.umontpellier.fr">majda.hamomi@etu.umontpellier.fr</a></li>
+<li>Gaggini Lorenzo : <a href="mailto:lorenzo.gaggini@etu.umontpellier.fr">lorenzo.gaggini@etu.umontpellier.fr</a></li>
+</ul>
+
+        
+        
+    </body>
+    </html>
