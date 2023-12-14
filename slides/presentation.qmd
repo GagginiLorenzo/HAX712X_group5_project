@@ -11,6 +11,13 @@ format:
 
 ---
 
+# Introduction
+
+**Objectifs :** un site interactif avec :
+
+   * une carte intéractive 
+   * différents types de graphiques 
+
 # Table des matières
    1) Introduction
    2) Traitement des données
@@ -18,13 +25,6 @@ format:
    4) Déploiement
    5) Conclusion 
 
-# Introduction
-
-**Objectifs :** un site interactif avec :
-
-   * une carte intéractive 
-   * différents types de graphiques 
-   
 
 ::: {.notes}
  un ou plusieurs graphiques simultanément décrivant l'évolution d'une valeur de polluant  ou bien donnée du climat. Tout ceci pourra être conditionné en amont par d'autres choix notamment temporels. 
