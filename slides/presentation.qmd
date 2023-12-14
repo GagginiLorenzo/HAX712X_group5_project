@@ -135,17 +135,7 @@ polluants = pol_influ.index.tolist()
 <center>
   <img src="./Images/im.jpg" alt="Description de l'image" style="width: 80%; height: auto;">
 </center>
-#
-   <p style="font-size: 30px;">Premier aperçu de la division par département de la région Occitanie présenté sur cette carte interactive.</p>
-<center>
-  <img src="./Images/fig1.PNG" alt="Description de l'image" style="width: 80%; height: auto;">
-</center>
-<style>
-  body {
-    font-size: 18px; 
-    color: #3366cc; 
-  }
-</style>
+
 #
    <p style="font-size: 30px;">Visualisation des concentrations du polluant O3 dans les différentes stations de mesure de la région Occitanie.</p>
 
@@ -159,7 +149,21 @@ polluants = pol_influ.index.tolist()
 <center>
   <img src="./Images/im2O3.PNG" alt="Description de l'image" style="width: 80%; height: auto;">
 </center>
+#
+<center>
+  <img src="./Images/p.PNG" alt="Description de l'image" style="width: 100%; height: auto;">
+</center>
 
+
+#
+<center>
+  <img src="./Images/v2.PNG" alt="Description de l'image" style="width: 80%; height: auto;">
+</center>
+
+#
+<center>
+  <img src="./Images/ipy.PNG" alt="Description de l'image" style="width: 100%; height: auto;">
+</center>
 # Déploiement 
 
 <img src="./Images/api.png" style="width: 80%; height: auto;">
