@@ -162,31 +162,7 @@ polluants = pol_influ.index.tolist()
 
 # Déploiement 
 
-<img src="./Images/deploy.jpg" style="width: 80%; height: auto;">
-
-## Appel API
-
-<center>
-![](./Images/api.svg){width=75%}
-</center>
-
-## Le flot de donnée
-
-   * **La proposition :** Communiquer avec des bases de données et exécuter du code Python depuis une page web statique déployée sur Github.
-
-## Le flot de donnée
-   * **La proposition :** Communiquer avec des bases de données et exécuter du code Python depuis une page web statique déployée sur Github.
-
-   * **Objectif :** Etablir un flot de données entre les bases de données et une Ghitub-page
-
-## Le flot de donnée
-
-   * **La proposition :** Communiquer avec des bases de données et exécuter du code Python depuis une page web statique déployée sur Github.
-
-   * **Objectif :** Etablir un flot de données entre les bases de données et une Ghitub-page
-
-   * **Enjeux :** page web hébergée sur un serveur statique : contraintes techniques
-
+<img src="./Images/api.png" style="width: 80%; height: auto;">
 
 ## ShinyLive
 
@@ -205,4 +181,32 @@ polluants = pol_influ.index.tolist()
    * Satisfait aux ambitions dynamiques du projet
 
    * Permet une interactivité totale entre les modules
+
+<center>
+![](./Images/shiny.png){width=90%}
+</center>
+
+## Le flot de données
+
+   * **La proposition :** Communiquer avec des bases de données et exécuter du code Python depuis une page web statique déployée sur Github.
+
+## Le flot de données
+   * **La proposition :** Communiquer avec des bases de données et exécuter du code Python depuis une page web statique déployée sur Github.
+
+   * **Objectif :** Etablir un flot de données entre les bases de données et une Ghitub-page
+
+## Le flot de données
+
+   * **La proposition :** Communiquer avec des bases de données et exécuter du code Python depuis une page web statique déployée sur Github.
+
+   * **Objectif :** Etablir un flot de données entre les bases de données et une Ghitub-page
+
+   * **Enjeux :** page web hébergée sur un serveur statique : contraintes techniques
+
+<center>
+![](./Images/flow.svg){width=75%}
+</center>
+
+
+
  

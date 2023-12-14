@@ -462,7 +462,7 @@ ABCHICHE Thiziri, BERNARD-REYMOND Guillaume, GAGGINI Lorenzo, HAMOMI Majda
 <ul>
 <li>Influence des saisons ?</li>
 <li>Influence des jours de la semaine ?</li>
-<li>Influence des type d’émetteurs ?</li>
+<li>Influence des types d’émetteurs ?</li>
 </ul>
 <center>
 <img data-src="./Images/questionnement.svg" style="width:40.0%">
@@ -512,6 +512,28 @@ ABCHICHE Thiziri, BERNARD-REYMOND Guillaume, GAGGINI Lorenzo, HAMOMI Majda
 <div class="sourceCode" id="cb3" data-code-line-numbers="1-3,12-16"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1"></a>pol_influ <span class="op">=</span> df_atmo.groupby([<span class="st">'influence'</span>, <span class="st">'nom_polluant'</span>])[</span>
 <span id="cb3-2"><a href="#cb3-2"></a>    <span class="st">'valeur'</span>].mean().<span class="bu">round</span>(<span class="dv">1</span>).unstack(level<span class="op">=</span><span class="dv">0</span>)</span>
 <span id="cb3-3"><a href="#cb3-3"></a>polluants <span class="op">=</span> pol_influ.index.tolist()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section class="slide level2">
+
+<p style="font-size: 50px;">
+<b> Evolution au cours du projet :</b>
+</p>
+<ul>
+<li><strong>Travail en local :</strong>
+<ul>
+<li>jeu de données complet en csv</li>
+<li>sélection</li>
+</ul></li>
+<li><strong>Appel API :</strong>
+<ul>
+<li>package request</li>
+<li>format json</li>
+</ul></li>
+<li><strong>Intégration :</strong>
+<ul>
+<li>sélection dans l’appel API</li>
+</ul></li>
+</ul>
 </section></section>
 <section id="visualisation" class="title-slide slide level1 center">
 <h1>Visualisation</h1>
@@ -559,34 +581,7 @@ Analyse détaillée des niveaux de pollution en 03 au sein d’une station spéc
 <section>
 <section id="déploiement" class="title-slide slide level1 center">
 <h1>Déploiement</h1>
-<p><img src="./Images/deploy.jpg" style="width: 80%; height: auto;"></p>
-</section>
-<section id="appel-api" class="slide level2">
-<h2>Appel API</h2>
-<center>
-<img data-src="./Images/api.svg" style="width:75.0%">
-</center>
-</section>
-<section id="le-flot-de-donnée" class="slide level2">
-<h2>Le flot de donnée</h2>
-<ul>
-<li><strong>La proposition :</strong> Communiquer avec des bases de données et exécuter du code Python depuis une page web statique déployée sur Github.</li>
-</ul>
-</section>
-<section id="le-flot-de-donnée-1" class="slide level2">
-<h2>Le flot de donnée</h2>
-<ul>
-<li><p><strong>La proposition :</strong> Communiquer avec des bases de données et exécuter du code Python depuis une page web statique déployée sur Github.</p></li>
-<li><p><strong>Objectif :</strong> Etablir un flot de données entre les bases de données et une Ghitub-page</p></li>
-</ul>
-</section>
-<section id="le-flot-de-donnée-2" class="slide level2">
-<h2>Le flot de donnée</h2>
-<ul>
-<li><p><strong>La proposition :</strong> Communiquer avec des bases de données et exécuter du code Python depuis une page web statique déployée sur Github.</p></li>
-<li><p><strong>Objectif :</strong> Etablir un flot de données entre les bases de données et une Ghitub-page</p></li>
-<li><p><strong>Enjeux :</strong> page web hébergée sur un serveur statique : contraintes techniques</p></li>
-</ul>
+<p><img src="./Images/api.png" style="width: 80%; height: auto;"></p>
 </section>
 <section id="shinylive" class="slide level2">
 <h2>ShinyLive</h2>
@@ -608,6 +603,33 @@ Analyse détaillée des niveaux de pollution en 03 au sein d’une station spéc
 <li><p>Satisfait aux ambitions dynamiques du projet</p></li>
 <li><p>Permet une interactivité totale entre les modules</p></li>
 </ul>
+<center>
+<img data-src="./Images/shiny.png" style="width:90.0%">
+</center>
+</section>
+<section id="le-flot-de-données" class="slide level2">
+<h2>Le flot de données</h2>
+<ul>
+<li><strong>La proposition :</strong> Communiquer avec des bases de données et exécuter du code Python depuis une page web statique déployée sur Github.</li>
+</ul>
+</section>
+<section id="le-flot-de-données-1" class="slide level2">
+<h2>Le flot de données</h2>
+<ul>
+<li><p><strong>La proposition :</strong> Communiquer avec des bases de données et exécuter du code Python depuis une page web statique déployée sur Github.</p></li>
+<li><p><strong>Objectif :</strong> Etablir un flot de données entre les bases de données et une Ghitub-page</p></li>
+</ul>
+</section>
+<section id="le-flot-de-données-2" class="slide level2">
+<h2>Le flot de données</h2>
+<ul>
+<li><p><strong>La proposition :</strong> Communiquer avec des bases de données et exécuter du code Python depuis une page web statique déployée sur Github.</p></li>
+<li><p><strong>Objectif :</strong> Etablir un flot de données entre les bases de données et une Ghitub-page</p></li>
+<li><p><strong>Enjeux :</strong> page web hébergée sur un serveur statique : contraintes techniques</p></li>
+</ul>
+<center>
+<img data-src="./Images/flow.svg" style="width:75.0%">
+</center>
 <div class="footer footer-default">
 
 </div>
