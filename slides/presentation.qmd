@@ -160,6 +160,15 @@ polluants = pol_influ.index.tolist()
   <img src="./Images/im2O3.PNG" alt="Description de l'image" style="width: 80%; height: auto;">
 </center>
 
+#
+<center>
+  <img src="./Images/v2.PNG" alt="Description de l'image" style="width: 80%; height: auto;">
+</center>
+
+#
+<center>
+  <img src="./Images/ipy.PNG" alt="Description de l'image" style="width: 100%; height: auto;">
+</center>
 # Déploiement 
 
 <img src="./Images/api.png" style="width: 80%; height: auto;">
