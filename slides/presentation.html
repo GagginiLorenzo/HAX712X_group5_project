@@ -404,37 +404,25 @@ ABCHICHE Thiziri, BERNARD-REYMOND Guillaume, GAGGINI Lorenzo, HAMOMI Majda
 </div>
 
 </section>
-<section id="introduction" class="title-slide slide level1 center">
-<h1>Introduction</h1>
-<p><strong>Objectifs :</strong> un site interactif avec :</p>
+<section id="objectifs" class="title-slide slide level1 center">
+<h1>Objectifs</h1>
+<p>Un site intéractif avec :</p>
 <ul>
-<li>une carte intéractive</li>
+<li>une carte intéractive et cliquable</li>
 <li>différents types de graphiques</li>
 </ul>
 </section>
 
-<section id="table-des-matières" class="title-slide slide level1 center">
-<h1>Table des matières</h1>
+<section id="répartition-des-rôles" class="title-slide slide level1 center">
+<h1>Répartition des rôles</h1>
 <ol type="1">
-<li>Introduction</li>
-<li>Traitement des données</li>
-<li>Visualisation</li>
-<li>Déploiement</li>
-<li>Conclusion</li>
+<li>Traitement des données : Guillaume</li>
+<li>Visualisation : Majda et Thiziri</li>
+<li>Architecure et déploiement : Lorenzo</li>
 </ol>
-<aside class="notes">
-<p>un ou plusieurs graphiques simultanément décrivant l’évolution d’une valeur de polluant ou bien donnée du climat. Tout ceci pourra être conditionné en amont par d’autres choix notamment temporels.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
+<center>
+<img data-src="./Images/role.png" style="width:70.0%">
+</center>
 </section>
 
 <section>
@@ -495,13 +483,13 @@ ABCHICHE Thiziri, BERNARD-REYMOND Guillaume, GAGGINI Lorenzo, HAMOMI Majda
 </center>
 <p><strong>Fonction de tracé :</strong></p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1"></a><span class="co"># colonne avec le numéro des jours</span></span>
-<span id="cb2-2"><a href="#cb2-2"></a>        df_pvs[<span class="st">"weekday"</span>] <span class="op">=</span> df_pvs.index.weekday</span>
-<span id="cb2-3"><a href="#cb2-3"></a>        <span class="co"># on regroupe par jour et on fait la moyenne</span></span>
-<span id="cb2-4"><a href="#cb2-4"></a>        pollution_week <span class="op">=</span> (</span>
-<span id="cb2-5"><a href="#cb2-5"></a>            df_pvs.groupby([<span class="st">"weekday"</span>, df_pvs.index.hour])[<span class="st">"valeur"</span>]</span>
-<span id="cb2-6"><a href="#cb2-6"></a>            .mean()</span>
-<span id="cb2-7"><a href="#cb2-7"></a>            .unstack(level<span class="op">=</span><span class="dv">0</span>)</span>
-<span id="cb2-8"><a href="#cb2-8"></a>        )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-2"><a href="#cb2-2"></a>   df_pvs[<span class="st">"weekday"</span>] <span class="op">=</span> df_pvs.index.weekday</span>
+<span id="cb2-3"><a href="#cb2-3"></a>   <span class="co"># on regroupe par jour et on fait la moyenne</span></span>
+<span id="cb2-4"><a href="#cb2-4"></a>   pollution_week <span class="op">=</span> (</span>
+<span id="cb2-5"><a href="#cb2-5"></a>       df_pvs.groupby([<span class="st">"weekday"</span>, df_pvs.index.hour])[<span class="st">"valeur"</span>]</span>
+<span id="cb2-6"><a href="#cb2-6"></a>       .mean()</span>
+<span id="cb2-7"><a href="#cb2-7"></a>       .unstack(level<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb2-8"><a href="#cb2-8"></a>   )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section class="slide level2">
 
@@ -555,7 +543,7 @@ Visualisation des concentrations du polluant O3 dans les différentes stations d
 <section id="section-1" class="title-slide slide level1 center">
 <h1></h1>
 <p style="font-size: 30px;">
-Analyse détaillée des niveaux de pollution en 03 au sein d’une station spécifique.
+Analyse détaillée des niveaux de pollution en O3 au sein d’une station spécifique.
 </p>
 <center>
 <img src="./Images/im2O3.PNG" alt="Description de l'image" style="width: 80%; height: auto;">
@@ -591,22 +579,22 @@ Analyse détaillée des niveaux de pollution en 03 au sein d’une station spéc
 <section id="shinylive" class="slide level2">
 <h2>ShinyLive</h2>
 <ul>
-<li>Solution qui respecte les contraintes du projet : documentée et supportée comme extension de quarto</li>
+<li>Respecte les contraintes du projet : documentée et supportée comme extension de quarto</li>
 </ul>
 </section>
 <section id="shinylive-1" class="slide level2">
 <h2>ShinyLive</h2>
 <ul>
-<li><p>Solution qui respecte les contraintes du projet : documentée et supportée comme extension de quarto</p></li>
+<li><p>Respecte les contraintes du projet : documentée et supportée comme extension de quarto</p></li>
 <li><p>Satisfait aux ambitions dynamiques du projet</p></li>
 </ul>
 </section>
 <section id="shinylive-2" class="slide level2">
 <h2>ShinyLive</h2>
 <ul>
-<li><p>Solution qui respecte les contraintes du projet : documentée et supportée comme extension de quarto</p></li>
+<li><p>Respecte les contraintes du projet : documentée et supportée comme extension de quarto</p></li>
 <li><p>Satisfait aux ambitions dynamiques du projet</p></li>
-<li><p>Permet une interactivité totale entre les modules</p></li>
+<li><p>Interactivité totale entre les modules</p></li>
 </ul>
 <center>
 <img data-src="./Images/shiny.png" style="width:90.0%">
@@ -630,7 +618,7 @@ Analyse détaillée des niveaux de pollution en 03 au sein d’une station spéc
 <ul>
 <li><p><strong>La proposition :</strong> Communiquer avec des bases de données et exécuter du code Python depuis une page web statique déployée sur Github.</p></li>
 <li><p><strong>Objectif :</strong> Etablir un flot de données entre les bases de données et une Ghitub-page</p></li>
-<li><p><strong>Enjeux :</strong> page web hébergée sur un serveur statique : contraintes techniques</p></li>
+<li><p><strong>Enjeux :</strong> Page web hébergée sur un serveur statique : contraintes techniques</p></li>
 </ul>
 <center>
 <img data-src="./Images/flow.svg" style="width:75.0%">

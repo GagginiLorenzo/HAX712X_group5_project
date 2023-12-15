@@ -11,19 +11,22 @@ format:
 
 ---
 
-# Introduction
+# Objectifs
 
-**Objectifs :** un site intéractif avec :
+Un site intéractif avec :
 
-   * une carte intéractive 
+   * une carte intéractive et cliquable 
    * différents types de graphiques 
 
-# Table des matières
-   1) Introduction
-   2) Traitement des données
-   3) Visualisation
-   4) Déploiement
-   5) Conclusion 
+# Répartition des rôles
+
+   1) Traitement des données : Guillaume
+   2) Visualisation : Majda et Thiziri
+   3) Architecure et déploiement : Lorenzo
+
+<center>
+![](./Images/role.png){width=70%}
+</center>
 
 # Traitement des données
 
